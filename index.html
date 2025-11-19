@@ -1,281 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Squares Memory Trainer</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Squares Trainer — Mobile Friendly</title>
 <style>
-    body {
-        font-family: Poppins, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background: linear-gradient(135deg, #dbeafe, #e9d5ff);
-        transition: 0.3s;
-        text-align: center;
-    }
-
-    body.dark {
-        background: #0f172a;
-        color: white;
-    }
-
-    h1 {
-        margin-top: 0;
-        color: #312e81;
-    }
-    body.dark h1 { color: #a5b4fc; }
-
-    .button-row {
-        margin: 20px 0;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 10px;
-        background: #6366f1;
-        color: white;
-        cursor: pointer;
-        font-size: 16px;
-        margin: 5px;
-    }
-    .btn:hover { background: #4f46e5; }
-
-    body.dark .btn {
-        background: #475569;
-    }
-
-    /* Study Grid */
-    .grid {
-        display: none;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-    }
-    .card {
-        background: white;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    body.dark .card { background: #1e293b; color: white; }
-
-    .number { font-size: 22px; font-weight: bold; color: #3b82f6; }
-    .square { font-size: 18px; color: #7c3aed; }
-
-    /* Quiz Mode */
-    #quizSection, #mcqSection { display: none; }
-
-    #question {
-        font-size: 26px;
-        margin-top: 20px;
-    }
-
-    input {
-        padding: 12px;
-        width: 200px;
-        border-radius: 8px;
-        border: 1px solid #94a3b8;
-        text-align: center;
-        font-size: 20px;
-    }
-
-    #feedback { margin-top: 20px; font-size: 20px; }
-
-    #score, #timer {
-        margin-top: 15px;
-        font-size: 18px;
-    }
-
-    /* MCQ Buttons */
-    .mcq-option {
-        display: block;
-        width: 250px;
-        padding: 10px;
-        margin: 8px auto;
-        border-radius: 8px;
-        border: 2px solid #6366f1;
-        cursor: pointer;
-        background: white;
-    }
-    body.dark .mcq-option { background: #1e293b; color: white; }
-
-    .mcq-option:hover { background: #e0e7ff; }
+  :root{
+    --bg: linear-gradient(135deg,#dbeafe,#e9d5ff);
+    --card: #fff;
+    --accent: #6366f1;
+    --muted: #94a3b8;
+    --text: #0f172a;
+    --success: #16a34a;
+    --danger: #ef4444;
+    --glass: rgba(255,255,255,0.65);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;padding:14px;}
+  header{width:100%;max-width:900px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:1.15rem}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button.btn{
+    appearance:none;border:0;padding:12px 14px;border-radius:12px;background:var(--accent);color:white;font-weight:600;
+    box-shadow:0 6px 18px rgba(99,102,241,0.18);font-size:15px;touch-action:manipulation;
+  }
+  button.ghost{background:transparent;color:var(--text);border:1px solid rgba(15,23,42,0.06);box-shadow:none}
+  main{width:100%;max-width:900px;margin-top:12px;flex:1;display:flex;flex-direction:column;gap:12px;}
+  .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between}
+  .modes{display:flex;gap:8px;flex-wrap:wrap}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr);width:100%}
+  @media(min-width:560px){.grid{grid-template-columns:repeat(6,1fr)}}
+  .card{background:var(--card);border-radius:12px;padding:12px;text-align:center;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+  .num{font-size:20px;font-weight:700;color:var(--accent)}
+  .sq{font-size:16px;color:#7c3aed;margin-top:6px}
+  /* Quiz / MCQ panels */
+  .panel{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 10px 30px rgba(2,6,23,0.06)}
+  .question{font-size:20px;font-weight:700;margin-bottom:10px}
+  input[type="number"]{width:120px;padding:10px;font-size:18px;border-radius:10px;border:1px solid var(--muted);text-align:center}
+  .feedback{min-height:28px;margin-top:8px;font-weight:700}
+  .score{font-size:14px;color:#334155;margin-top:6px}
+  .hintBox{margin-top:8px;padding:10px;border-radius:10px;background:rgba(10,10,10,0.03);font-size:14px}
+  .mcq-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .option{padding:12px;border-radius:12px;border:2px solid var(--accent);background:white;font-weight:600}
+  .option:active{transform:translateY(1px)}
+  footer{width:100%;max-width:900px;padding:10px 0;text-align:center;color:#475569;font-size:13px}
+  /* Dark mode */
+  .dark{--bg:#0b1220;--card:#071028;--accent:#7c3aed;--muted:#334155;--text:#e6eef8;--glass:rgba(255,255,255,0.04)}
+  .small{font-size:13px}
+  /* Big touch targets for mobile */
+  .big{padding:14px 16px;border-radius:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
-
 <body>
 
-<h1>Squares Memory Trainer (2 to 50)</h1>
+<header>
+  <h1>Squares Trainer (2 → 50)</h1>
+  <div class="controls">
+    <button id="darkToggle" class="btn ghost">🌙</button>
+    <button id="clearProgress" class="btn ghost">Reset</button>
+  </div>
+</header>
 
-<div class="button-row">
-    <button class="btn" onclick="showStudy()">📘 Study Mode</button>
-    <button class="btn" onclick="startQuiz()">🧠 Quiz Mode</button>
-    <button class="btn" onclick="startMCQ()">❓ MCQ Mode</button>
-    <button class="btn" onclick="toggleDark()">🌙 Dark Mode</button>
-</div>
+<main>
+  <div class="topbar">
+    <div class="modes row">
+      <button class="btn big" id="studyBtn">📘 Study</button>
+      <button class="btn big" id="quizBtn">🧠 Quiz</button>
+      <button class="btn big" id="mcqBtn">❓ MCQ</button>
+    </div>
 
-<!-- Study Mode -->
-<div id="studyGrid" class="grid"></div>
+    <div class="row">
+      <button class="btn ghost" id="hintBtn">💡 Hint</button>
+      <button class="btn ghost" id="stepsBtn">🧾 Show steps</button>
+      <label class="ghost small" style="display:flex;align-items:center;padding:8px;border-radius:10px;">
+        <input id="timerToggle" type="checkbox" style="margin-right:8px"> Timer
+      </label>
+    </div>
+  </div>
 
-<!-- Quiz Mode -->
-<div id="quizSection">
-    <div id="timer"></div>
-    <div id="question"></div>
-    <input id="answer" type="number" placeholder="Your answer" onkeypress="checkEnter(event)">
-    <br><br>
-    <button class="btn" onclick="checkAnswer()">Submit</button>
-    <div id="feedback"></div>
-    <div id="score"></div>
-</div>
+  <!-- Study grid -->
+  <section id="studySection" class="grid"></section>
 
-<!-- MCQ Mode -->
-<div id="mcqSection">
-    <div id="mcqQuestion"></div>
-    <button class="mcq-option" onclick="checkMCQ(0)" id="opt0"></button>
-    <button class="mcq-option" onclick="checkMCQ(1)" id="opt1"></button>
-    <button class="mcq-option" onclick="checkMCQ(2)" id="opt2"></button>
-    <button class="mcq-option" onclick="checkMCQ(3)" id="opt3"></button>
-    <div id="mcqFeedback"></div>
-</div>
+  <!-- Quiz panel -->
+  <section id="quizSection" class="panel" style="display:none">
+    <div class="question" id="qText">What is 2² ?</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input id="answerInput" type="number" inputmode="numeric" autocomplete="off" placeholder="Answer">
+      <button id="submitBtn" class="btn">Submit</button>
+      <div id="timerDisplay" style="font-weight:700;color:#334155"> </div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="score" id="score"></div>
+    <div class="hintBox" id="hintBox">Hints appear here — tap 💡 or get an automatic context hint.</div>
+  </section>
 
-<!-- Sounds -->
-<audio id="correctSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-<audio id="wrongSound" src="https://assets.mixkit.co/active_storage/sfx/997/997-preview.mp3"></audio>
+  <!-- MCQ panel -->
+  <section id="mcqSection" class="panel" style="display:none">
+    <div class="question" id="mcqText">What is 2² ?</div>
+    <div class="mcq-grid">
+      <button class="option" id="opt0"></button>
+      <button class="option" id="opt1"></button>
+      <button class="option" id="opt2"></button>
+      <button class="option" id="opt3"></button>
+    </div>
+    <div class="feedback" id="mcqFeedback"></div>
+    <div class="score" id="mcqScore"></div>
+    <div class="hintBox" id="mcqHint">MCQ hint appears here.</div>
+  </section>
+</main>
+
+<footer>Tip: Use context hints — they show the fastest trick to compute the square in your head.</footer>
 
 <script>
-/* ---------------- Study Mode ---------------- */
-const studyGrid = document.getElementById("studyGrid");
-for (let i = 2; i <= 50; i++) {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<div class='number'>${i}</div>=<div class='square'>${i*i}</div>`;
-    studyGrid.appendChild(card);
+/* ------------------ App Data ------------------ */
+const MIN = 2, MAX = 50;
+const numbers = Array.from({length: MAX-MIN+1}, (_,i)=>MIN+i);
+
+/* ------------------ UI refs ------------------ */
+const studySection = document.getElementById('studySection');
+const quizSection = document.getElementById('quizSection');
+const mcqSection = document.getElementById('mcqSection');
+const qText = document.getElementById('qText');
+const answerInput = document.getElementById('answerInput');
+const submitBtn = document.getElementById('submitBtn');
+const feedback = document.getElementById('feedback');
+const scoreEl = document.getElementById('score');
+const hintBox = document.getElementById('hintBox');
+const hintBtn = document.getElementById('hintBtn');
+const stepsBtn = document.getElementById('stepsBtn');
+const darkToggle = document.getElementById('darkToggle');
+const timerToggle = document.getElementById('timerToggle');
+const timerDisplay = document.getElementById('timerDisplay');
+const mcqText = document.getElementById('mcqText');
+const opts = [document.getElementById('opt0'),document.getElementById('opt1'),document.getElementById('opt2'),document.getElementById('opt3')];
+const mcqFeedback = document.getElementById('mcqFeedback');
+const mcqHint = document.getElementById('mcqHint');
+const mcqScore = document.getElementById('mcqScore');
+const clearProgress = document.getElementById('clearProgress');
+
+/* ------------------ Sounds (WebAudio) ------------------ */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function beep(freq=440,dur=0.12,vol=0.12){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type='sine'; o.frequency.value = freq;
+  g.gain.value = vol;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); setTimeout(()=>{ o.stop(); }, dur*1000);
 }
 
-function showStudy(){
-    studyGrid.style.display = "grid";
-    quizSection.style.display = "none";
-    mcqSection.style.display = "none";
+/* ------------------ Local Storage progress ------------------ */
+const LS_KEY = 'squares_trainer_v1';
+function saveProgress(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+function loadProgress(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch(e){return{};} }
+let progress = loadProgress();
+if(!progress.quiz) progress.quiz={correct:0,total:0};
+if(!progress.mcq) progress.mcq={correct:0,total:0};
+
+/* ------------------ Build Study Grid ------------------ */
+function buildStudyGrid(){
+  studySection.innerHTML = '';
+  numbers.forEach(n=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<div class="num">${n}</div><div class="sq">${n*n}</div>`;
+    studySection.appendChild(card);
+  });
+}
+buildStudyGrid();
+
+/* ------------------ Mode switching ------------------ */
+document.getElementById('studyBtn').onclick = ()=>{ showMode('study'); };
+document.getElementById('quizBtn').onclick = ()=>{ startQuiz(); };
+document.getElementById('mcqBtn').onclick = ()=>{ startMCQ(); };
+darkToggle.onclick = ()=>{ document.body.classList.toggle('dark'); };
+clearProgress.onclick = ()=>{ if(confirm('Clear saved progress?')){ localStorage.removeItem(LS_KEY); progress = {quiz:{correct:0,total:0},mcq:{correct:0,total:0}}; updateScores(); } };
+
+/* ------------------ Hints (random + context-aware) ------------------ */
+const randomHints = [
+  "Squares end with: 0→00,1→1,2→4,3→9,4→6,5→25,6→36,7→49,8→64,9→81.",
+  "Numbers ending with 5: (a5)² = a×(a+1) then add 25. e.g. 45² → 4×5 =20 → 2025.",
+  "Use (n−1)(n+1)+1 for many numbers. Example: 38² = 37×39 +1.",
+  "If close to 100: n² = 10000 − 200×(100−n) + (100−n)². Example: 98² = 9604.",
+  "Squares grow by odd numbers: 4→9 (+5),9→16 (+7),16→25 (+9)...",
+  "For double numbers: (2a)² = 4×(a²). Example 14² = 4×7² = 196.",
+  "Squares never end in 2, 3, 7 or 8.",
+  "Visual split: (20+6)² = 400 + 240 + 36 = 676."
+];
+
+function randomHint(){
+  return randomHints[Math.floor(Math.random()*randomHints.length)];
 }
 
-/* ---------------- Quiz Mode ---------------- */
-let currentNumber = 0, correct = 0, total = 0;
-let timerInterval, timeLeft = 20;
+/* Context-aware hint for a number n */
+function contextHint(n){
+  const s = String(n);
+  if(s.endsWith('5')) return `Ends with 5 → Use (a×(a+1)) then add 25. For ${n}: ${(n/10|0)}×${(n/10|0)+1} then add 25.`;
+  if(Math.abs(n-50) <= 5){
+    const d = n-50;
+    return `Near 50 → 50²=2500; n² = 2500 + ${d*100} + ${d*d}. For ${n}: ${2500 + d*100 + d*d}`;
+  }
+  if(Math.abs(n-100) <= 5){
+    const d = 100-n;
+    return `Near 100 → n² = 10000 - 200×${d} + ${d*d}. For ${n}: ${10000 - 200*d + d*d}`;
+  }
+  if(n<20) return `Small number hint: multiply n×n directly. e.g. 13² = 169`;
+  // last digit pattern
+  const last = n%10;
+  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
+  return `Last-digit trick: since number ends with ${last}, square ends with ${endings[last]}.`;
+}
+
+/* Show hint (random + context-aware) */
+hintBtn.onclick = ()=>{
+  if(currentQuizNumber) {
+    hintBox.innerText = 'Hint: ' + contextHint(currentQuizNumber);
+  } else if(currentMCQNumber){
+    mcqHint.innerText = 'Hint: ' + contextHint(currentMCQNumber);
+  } else {
+    hintBox.innerText = 'Hint: ' + randomHint();
+  }
+};
+
+/* Steps button: show quick calculation steps for current number */
+stepsBtn.onclick = ()=>{
+  if(currentQuizNumber){
+    hintBox.innerText = 'Steps: ' + stepExplanation(currentQuizNumber);
+  } else if(currentMCQNumber){
+    mcqHint.innerText = 'Steps: ' + stepExplanation(currentMCQNumber);
+  } else {
+    hintBox.innerText = 'Select Quiz or MCQ to see step-by-step for a number.';
+  }
+};
+
+function stepExplanation(n){
+  if(String(n).endsWith('5')){
+    const a = Math.floor(n/10);
+    return `${n}² → ${a}×${a+1} = ${a*(a+1)} → append 25 → ${a*(a+1)}25`;
+  }
+  if(Math.abs(n-50)<=5){
+    const d=n-50;
+    return `${n}² → 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`;
+  }
+  if(n<30){
+    // split into tens and ones
+    const t = Math.floor(n/10)*10;
+    const u = n%10;
+    return `Split: (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`;
+  }
+  return `Use (n−1)(n+1)+1: ${n}² = ${n-1}×${n+1} + 1 = ${ (n-1)*(n+1) } + 1 = ${(n-1)*(n+1) + 1}`;
+}
+
+/* ------------------ Quiz logic ------------------ */
+let currentQuizNumber = null;
+let quizTimer = null;
+let quizTimeLeft = 0;
+function showMode(mode){
+  studySection.style.display = (mode==='study')?'grid':'none';
+  quizSection.style.display = (mode==='quiz')?'block':'none';
+  mcqSection.style.display = (mode==='mcq')?'block':'none';
+}
 
 function startQuiz(){
-    studyGrid.style.display = "none";
-    mcqSection.style.display = "none";
-    quizSection.style.display = "block";
-
-    correct = 0; total = 0;
-    askQuestion();
-    startTimer();
+  showMode('quiz');
+  progress.quiz = progress.quiz || {correct:0,total:0};
+  updateScores();
+  nextQuizQuestion();
 }
 
-function startTimer(){
-    timeLeft = 20;
-    document.getElementById("timer").innerText = `⏳ Time: ${timeLeft}s`;
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").innerText = `⏳ Time: ${timeLeft}s`;
-
-        if(timeLeft <= 0){
-            clearInterval(timerInterval);
-            checkAnswer(true); // auto wrong
-        }
-    }, 1000);
+function nextQuizQuestion(){
+  currentQuizNumber = numbers[Math.floor(Math.random()*numbers.length)];
+  qText.innerText = `What is ${currentQuizNumber}² ?`;
+  answerInput.value = '';
+  feedback.innerText = '';
+  hintBox.innerText = 'Tap 💡 for a helpful hint.';
+  if(timerToggle.checked){
+    startQuizTimer(18); // 18s by default
+  } else {
+    stopQuizTimer();
+    timerDisplay.innerText = '';
+  }
+  // small accessibility focus
+  setTimeout(()=>answerInput.focus(),200);
 }
 
-function askQuestion(){
-    currentNumber = Math.floor(Math.random()*49)+2;
-    document.getElementById("question").innerText = `What is ${currentNumber}² ?`;
-    document.getElementById("answer").value="";
-    document.getElementById("feedback").innerText="";
+submitBtn.onclick = checkQuizAnswer;
+answerInput.addEventListener('keypress', e=>{ if(e.key==='Enter') checkQuizAnswer(); });
+
+function checkQuizAnswer(auto=false){
+  if(!currentQuizNumber) return;
+  const val = Number(answerInput.value);
+  const correctAns = currentQuizNumber*currentQuizNumber;
+  progress.quiz.total++;
+  if(!auto && val === correctAns){
+    feedback.style.color = 'var(--success)';
+    feedback.innerText = '✓ Correct';
+    beep(880,0.08,0.08);
+    progress.quiz.correct++;
+  } else {
+    feedback.style.color = 'var(--danger)';
+    feedback.innerText = `✗ Wrong — ${correctAns}`;
+    // short double-beep
+    beep(200,0.05,0.06); setTimeout(()=>beep(160,0.06,0.06),110);
+  }
+  saveProgress(progress);
+  updateScores();
+  stopQuizTimer();
+  // next after short delay
+  setTimeout(nextQuizQuestion, 900);
 }
 
-function checkAnswer(auto=false){
-    const userAns = Number(document.getElementById("answer").value);
-    const correctAns = currentNumber * currentNumber;
-    total++;
-
-    if(userAns === correctAns && !auto){
-        document.getElementById("feedback").style.color="green";
-        document.getElementById("feedback").innerText="✓ Correct!";
-        document.getElementById("correctSound").play();
-        correct++;
-    } else {
-        document.getElementById("feedback").style.color="red";
-        document.getElementById("feedback").innerText=`✗ Wrong! Correct: ${correctAns}`;
-        document.getElementById("wrongSound").play();
+/* Timer for quiz */
+function startQuizTimer(seconds){
+  stopQuizTimer();
+  quizTimeLeft = seconds;
+  timerDisplay.innerText = `⏳ ${quizTimeLeft}s`;
+  quizTimer = setInterval(()=>{
+    quizTimeLeft--;
+    timerDisplay.innerText = `⏳ ${quizTimeLeft}s`;
+    if(quizTimeLeft<=0){
+      clearInterval(quizTimer);
+      timerDisplay.innerText = `⏳ 0s`;
+      checkQuizAnswer(true); // auto submit as wrong
     }
-
-    document.getElementById("score").innerText = `Score: ${correct}/${total}`;
-
-    clearInterval(timerInterval);
-    setTimeout(() => { askQuestion(); startTimer(); }, 1300);
+  },1000);
 }
+function stopQuizTimer(){ if(quizTimer) clearInterval(quizTimer); quizTimer=null; }
 
-function checkEnter(e){ if(e.key==="Enter") checkAnswer(); }
-
-/* ---------------- MCQ Mode ---------------- */
+/* ------------------ MCQ logic ------------------ */
+let currentMCQNumber = null;
 function startMCQ(){
-    quizSection.style.display = "none";
-    studyGrid.style.display = "none";
-    mcqSection.style.display = "block";
-    generateMCQ();
+  showMode('mcq');
+  progress.mcq = progress.mcq || {correct:0,total:0};
+  updateScores();
+  generateMCQ();
 }
 
 function generateMCQ(){
-    let num = Math.floor(Math.random()*49)+2;
-    let correct = num*num;
-
-    document.getElementById("mcqQuestion").innerHTML = `<h2>What is ${num}² ?</h2>`;
-
-    let answers = [correct];
-    while(answers.length < 4){
-        let wrong = correct + Math.floor(Math.random()*80) - 40;
-        if(wrong > 0 && !answers.includes(wrong)) answers.push(wrong);
-    }
-
-    answers.sort(() => Math.random()-0.5);
-
-    answers.forEach((val, i) => {
-        document.getElementById("opt"+i).innerText = val;
-        document.getElementById("opt"+i).setAttribute("data-value", val);
-    });
-
-    window.correctMCQ = correct;
+  currentMCQNumber = numbers[Math.floor(Math.random()*numbers.length)];
+  const correct = currentMCQNumber*currentMCQNumber;
+  mcqText.innerText = `What is ${currentMCQNumber}² ?`;
+  // generate plausible wrong options
+  const optsArr = new Set([correct]);
+  while(optsArr.size < 4){
+    // create wrong by adding ± small deltas or swap tens
+    const delta = (Math.floor(Math.random()*7)-3) * (Math.floor(Math.random()*15)+1);
+    const cand = Math.max(1, correct + delta);
+    optsArr.add(cand);
+  }
+  const arr = Array.from(optsArr).sort(()=>Math.random()-0.5);
+  arr.forEach((v,i)=>{ opts[i].innerText = v; opts[i].dataset.val = v; });
+  mcqFeedback.innerText = '';
+  mcqHint.innerText = 'Tap 💡 for a context hint.';
 }
 
-function checkMCQ(index){
-    let val = Number(document.getElementById("opt"+index).getAttribute("data-value"));
-    let feedback = document.getElementById("mcqFeedback");
+opts.forEach((el,i)=> el.onclick = ()=>{ checkMCQ(i); });
 
-    if(val === window.correctMCQ){
-        feedback.style.color = "limegreen";
-        feedback.innerText = "✓ Correct!";
-        document.getElementById("correctSound").play();
-    } else {
-        feedback.style.color = "red";
-        feedback.innerText = "✗ Wrong!";
-        document.getElementById("wrongSound").play();
-    }
-
-    setTimeout(() => {
-        feedback.innerText="";
-        generateMCQ();
-    }, 1000);
+function checkMCQ(i){
+  const val = Number(opts[i].dataset.val);
+  const correct = currentMCQNumber*currentMCQNumber;
+  progress.mcq.total++;
+  if(val === correct){
+    mcqFeedback.style.color = 'var(--success)';
+    mcqFeedback.innerText = '✓ Correct';
+    beep(880,0.08,0.08);
+    progress.mcq.correct++;
+  } else {
+    mcqFeedback.style.color = 'var(--danger)';
+    mcqFeedback.innerText = `✗ Wrong — ${correct}`;
+    beep(200,0.05,0.06); setTimeout(()=>beep(160,0.06,0.06),110);
+  }
+  saveProgress(progress);
+  updateScores();
+  setTimeout(generateMCQ,900);
 }
 
-/* ---------------- Dark Mode ---------------- */
-function toggleDark(){
-    document.body.classList.toggle("dark");
+/* ------------------ Scores & UI ------------------ */
+function updateScores(){
+  scoreEl.innerText = `Quiz Score: ${progress.quiz.correct||0}/${progress.quiz.total||0}`;
+  mcqScore.innerText = `MCQ Score: ${progress.mcq.correct||0}/${progress.mcq.total||0}`;
 }
+updateScores();
+
+/* ------------------ Init default view ------------------ */
+showMode('study');
+
+/* ------------------ Utility: context hint auto when question changes -------------- */
+/* When a new question is shown we automatically provide a short context hint (non-spoiler)
+   This helps learners without them pressing hint every time. */
+const observerOptions = {childList:true,subtree:true};
+const quizObserver = new MutationObserver(() => {
+  if(currentQuizNumber) hintBox.innerText = 'Quick tip: ' + contextHint(currentQuizNumber).split('→')[0];
+});
+quizObserver.observe(qText, observerOptions);
+
+const mcqObserver = new MutationObserver(() => {
+  if(currentMCQNumber) mcqHint.innerText = 'Quick tip: ' + contextHint(currentMCQNumber).split('→')[0];
+});
+mcqObserver.observe(mcqText, observerOptions);
+
+/* ------------------ Clear focus-friendly UX ------------------ */
+document.addEventListener('touchstart', ()=>{}); // ensure mobile audio allowed on user gesture
+
 </script>
-
 </body>
 </html>
