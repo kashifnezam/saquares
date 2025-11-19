@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Squares from 2 to 50 – Study & Quiz</title>
+
+<style>
+    body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #dbeafe, #e9d5ff);
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        color: #312e81;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #6366f1;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 5px;
+        transition: 0.2s;
+    }
+
+    .btn:hover {
+        background: #4f46e5;
+    }
+
+    .grid {
+        display: none;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+
+    .number { font-size: 22px; font-weight: bold; color: #3b82f6; }
+    .square { font-size: 18px; color: #7c3aed; }
+
+    /* Quiz section */
+    #quizSection {
+        display: none;
+        margin-top: 25px;
+    }
+
+    #question {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #1e293b;
+    }
+
+    input {
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #94a3b8;
+        width: 200px;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    #feedback {
+        margin-top: 15px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    #score {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #334155;
+    }
+</style>
+</head>
+<body>
+
+<h1>Squares from 2 to 50</h1>
+
+<button class="btn" onclick="showStudy()">📘 Study Mode</button>
+<button class="btn" onclick="startQuiz()">🧠 Quiz Mode</button>
+
+<!-- Study mode -->
+<div id="studyGrid" class="grid"></div>
+
+<!-- Quiz mode -->
+<div id="quizSection">
+    <div id="question"></div>
+    <input id="answer" type="number" placeholder="Your answer" onkeypress="checkEnter(event)">
+    <br><br>
+    <button class="btn" onclick="checkAnswer()">Submit</button>
+
+    <div id="feedback"></div>
+    <div id="score"></div>
+</div>
+
+<script>
+    const studyGrid = document.getElementById("studyGrid");
+    const quizSection = document.getElementById("quizSection");
+    let currentNumber = 0;
+    let correct = 0, total = 0;
+
+    // Create study cards
+    for (let i = 2; i <= 50; i++) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div class="number">${i}</div>
+            =
+            <div class="square">${i * i}</div>
+        `;
+        studyGrid.appendChild(card);
+    }
+
+    function showStudy() {
+        studyGrid.style.display = "grid";
+        quizSection.style.display = "none";
+    }
+
+    function startQuiz() {
+        studyGrid.style.display = "none";
+        quizSection.style.display = "block";
+        correct = 0;
+        total = 0;
+        askQuestion();
+    }
+
+    function askQuestion() {
+        currentNumber = Math.floor(Math.random() * 49) + 2; // 2-50
+        document.getElementById("question").innerText = `What is ${currentNumber}² ?`;
+        document.getElementById("answer").value = "";
+        document.getElementById("feedback").innerText = "";
+    }
+
+    function checkAnswer() {
+        const userAns = Number(document.getElementById("answer").value);
+        const correctAns = currentNumber * currentNumber;
+        total++;
+
+        if (userAns === correctAns) {
+            correct++;
+            document.getElementById("feedback").style.color = "green";
+            document.getElementById("feedback").innerText = "✓ Correct!";
+        } else {
+            document.getElementById("feedback").style.color = "red";
+            document.getElementById("feedback").innerText = `✗ Wrong! Correct answer: ${correctAns}`;
+        }
+
+        document.getElementById("score").innerText = `Score: ${correct}/${total}`;
+        setTimeout(askQuestion, 1200);
+    }
+
+    function checkEnter(e) {
+        if (e.key === "Enter") checkAnswer();
+    }
+</script>
+
+</body>
+</html>
