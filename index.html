@@ -3,174 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Squares from 2 to 50 – Study & Quiz</title>
+<title>Squares Memory Trainer</title>
 
 <style>
     body {
-        font-family: "Poppins", sans-serif;
-        background: linear-gradient(135deg, #dbeafe, #e9d5ff);
+        font-family: Poppins, sans-serif;
         margin: 0;
         padding: 20px;
+        background: linear-gradient(135deg, #dbeafe, #e9d5ff);
+        transition: 0.3s;
         text-align: center;
     }
 
+    body.dark {
+        background: #0f172a;
+        color: white;
+    }
+
     h1 {
+        margin-top: 0;
         color: #312e81;
-        margin-bottom: 10px;
+    }
+    body.dark h1 { color: #a5b4fc; }
+
+    .button-row {
+        margin: 20px 0;
     }
 
     .btn {
         padding: 10px 20px;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         background: #6366f1;
         color: white;
         cursor: pointer;
         font-size: 16px;
         margin: 5px;
-        transition: 0.2s;
+    }
+    .btn:hover { background: #4f46e5; }
+
+    body.dark .btn {
+        background: #475569;
     }
 
-    .btn:hover {
-        background: #4f46e5;
-    }
-
+    /* Study Grid */
     .grid {
         display: none;
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 15px;
         margin-top: 20px;
     }
-
     .card {
         background: white;
         padding: 15px;
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        transition: 0.2s;
     }
-
-    .card:hover {
-        transform: translateY(-4px);
-    }
+    body.dark .card { background: #1e293b; color: white; }
 
     .number { font-size: 22px; font-weight: bold; color: #3b82f6; }
     .square { font-size: 18px; color: #7c3aed; }
 
-    /* Quiz section */
-    #quizSection {
-        display: none;
-        margin-top: 25px;
-    }
+    /* Quiz Mode */
+    #quizSection, #mcqSection { display: none; }
 
     #question {
-        font-size: 24px;
-        margin-bottom: 15px;
-        color: #1e293b;
+        font-size: 26px;
+        margin-top: 20px;
     }
 
     input {
-        padding: 10px;
+        padding: 12px;
+        width: 200px;
         border-radius: 8px;
         border: 1px solid #94a3b8;
-        width: 200px;
         text-align: center;
-        font-size: 18px;
-    }
-
-    #feedback {
-        margin-top: 15px;
         font-size: 20px;
-        font-weight: bold;
     }
 
-    #score {
-        margin-top: 20px;
+    #feedback { margin-top: 20px; font-size: 20px; }
+
+    #score, #timer {
+        margin-top: 15px;
         font-size: 18px;
-        color: #334155;
     }
+
+    /* MCQ Buttons */
+    .mcq-option {
+        display: block;
+        width: 250px;
+        padding: 10px;
+        margin: 8px auto;
+        border-radius: 8px;
+        border: 2px solid #6366f1;
+        cursor: pointer;
+        background: white;
+    }
+    body.dark .mcq-option { background: #1e293b; color: white; }
+
+    .mcq-option:hover { background: #e0e7ff; }
 </style>
 </head>
+
 <body>
 
-<h1>Squares from 2 to 50</h1>
+<h1>Squares Memory Trainer (2 to 50)</h1>
 
-<button class="btn" onclick="showStudy()">📘 Study Mode</button>
-<button class="btn" onclick="startQuiz()">🧠 Quiz Mode</button>
+<div class="button-row">
+    <button class="btn" onclick="showStudy()">📘 Study Mode</button>
+    <button class="btn" onclick="startQuiz()">🧠 Quiz Mode</button>
+    <button class="btn" onclick="startMCQ()">❓ MCQ Mode</button>
+    <button class="btn" onclick="toggleDark()">🌙 Dark Mode</button>
+</div>
 
-<!-- Study mode -->
+<!-- Study Mode -->
 <div id="studyGrid" class="grid"></div>
 
-<!-- Quiz mode -->
+<!-- Quiz Mode -->
 <div id="quizSection">
+    <div id="timer"></div>
     <div id="question"></div>
     <input id="answer" type="number" placeholder="Your answer" onkeypress="checkEnter(event)">
     <br><br>
     <button class="btn" onclick="checkAnswer()">Submit</button>
-
     <div id="feedback"></div>
     <div id="score"></div>
 </div>
 
+<!-- MCQ Mode -->
+<div id="mcqSection">
+    <div id="mcqQuestion"></div>
+    <button class="mcq-option" onclick="checkMCQ(0)" id="opt0"></button>
+    <button class="mcq-option" onclick="checkMCQ(1)" id="opt1"></button>
+    <button class="mcq-option" onclick="checkMCQ(2)" id="opt2"></button>
+    <button class="mcq-option" onclick="checkMCQ(3)" id="opt3"></button>
+    <div id="mcqFeedback"></div>
+</div>
+
+<!-- Sounds -->
+<audio id="correctSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="wrongSound" src="https://assets.mixkit.co/active_storage/sfx/997/997-preview.mp3"></audio>
+
 <script>
-    const studyGrid = document.getElementById("studyGrid");
-    const quizSection = document.getElementById("quizSection");
-    let currentNumber = 0;
-    let correct = 0, total = 0;
+/* ---------------- Study Mode ---------------- */
+const studyGrid = document.getElementById("studyGrid");
+for (let i = 2; i <= 50; i++) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<div class='number'>${i}</div>=<div class='square'>${i*i}</div>`;
+    studyGrid.appendChild(card);
+}
 
-    // Create study cards
-    for (let i = 2; i <= 50; i++) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-            <div class="number">${i}</div>
-            =
-            <div class="square">${i * i}</div>
-        `;
-        studyGrid.appendChild(card);
-    }
+function showStudy(){
+    studyGrid.style.display = "grid";
+    quizSection.style.display = "none";
+    mcqSection.style.display = "none";
+}
 
-    function showStudy() {
-        studyGrid.style.display = "grid";
-        quizSection.style.display = "none";
-    }
+/* ---------------- Quiz Mode ---------------- */
+let currentNumber = 0, correct = 0, total = 0;
+let timerInterval, timeLeft = 20;
 
-    function startQuiz() {
-        studyGrid.style.display = "none";
-        quizSection.style.display = "block";
-        correct = 0;
-        total = 0;
-        askQuestion();
-    }
+function startQuiz(){
+    studyGrid.style.display = "none";
+    mcqSection.style.display = "none";
+    quizSection.style.display = "block";
 
-    function askQuestion() {
-        currentNumber = Math.floor(Math.random() * 49) + 2; // 2-50
-        document.getElementById("question").innerText = `What is ${currentNumber}² ?`;
-        document.getElementById("answer").value = "";
-        document.getElementById("feedback").innerText = "";
-    }
+    correct = 0; total = 0;
+    askQuestion();
+    startTimer();
+}
 
-    function checkAnswer() {
-        const userAns = Number(document.getElementById("answer").value);
-        const correctAns = currentNumber * currentNumber;
-        total++;
+function startTimer(){
+    timeLeft = 20;
+    document.getElementById("timer").innerText = `⏳ Time: ${timeLeft}s`;
 
-        if (userAns === correctAns) {
-            correct++;
-            document.getElementById("feedback").style.color = "green";
-            document.getElementById("feedback").innerText = "✓ Correct!";
-        } else {
-            document.getElementById("feedback").style.color = "red";
-            document.getElementById("feedback").innerText = `✗ Wrong! Correct answer: ${correctAns}`;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = `⏳ Time: ${timeLeft}s`;
+
+        if(timeLeft <= 0){
+            clearInterval(timerInterval);
+            checkAnswer(true); // auto wrong
         }
+    }, 1000);
+}
 
-        document.getElementById("score").innerText = `Score: ${correct}/${total}`;
-        setTimeout(askQuestion, 1200);
+function askQuestion(){
+    currentNumber = Math.floor(Math.random()*49)+2;
+    document.getElementById("question").innerText = `What is ${currentNumber}² ?`;
+    document.getElementById("answer").value="";
+    document.getElementById("feedback").innerText="";
+}
+
+function checkAnswer(auto=false){
+    const userAns = Number(document.getElementById("answer").value);
+    const correctAns = currentNumber * currentNumber;
+    total++;
+
+    if(userAns === correctAns && !auto){
+        document.getElementById("feedback").style.color="green";
+        document.getElementById("feedback").innerText="✓ Correct!";
+        document.getElementById("correctSound").play();
+        correct++;
+    } else {
+        document.getElementById("feedback").style.color="red";
+        document.getElementById("feedback").innerText=`✗ Wrong! Correct: ${correctAns}`;
+        document.getElementById("wrongSound").play();
     }
 
-    function checkEnter(e) {
-        if (e.key === "Enter") checkAnswer();
+    document.getElementById("score").innerText = `Score: ${correct}/${total}`;
+
+    clearInterval(timerInterval);
+    setTimeout(() => { askQuestion(); startTimer(); }, 1300);
+}
+
+function checkEnter(e){ if(e.key==="Enter") checkAnswer(); }
+
+/* ---------------- MCQ Mode ---------------- */
+function startMCQ(){
+    quizSection.style.display = "none";
+    studyGrid.style.display = "none";
+    mcqSection.style.display = "block";
+    generateMCQ();
+}
+
+function generateMCQ(){
+    let num = Math.floor(Math.random()*49)+2;
+    let correct = num*num;
+
+    document.getElementById("mcqQuestion").innerHTML = `<h2>What is ${num}² ?</h2>`;
+
+    let answers = [correct];
+    while(answers.length < 4){
+        let wrong = correct + Math.floor(Math.random()*80) - 40;
+        if(wrong > 0 && !answers.includes(wrong)) answers.push(wrong);
     }
+
+    answers.sort(() => Math.random()-0.5);
+
+    answers.forEach((val, i) => {
+        document.getElementById("opt"+i).innerText = val;
+        document.getElementById("opt"+i).setAttribute("data-value", val);
+    });
+
+    window.correctMCQ = correct;
+}
+
+function checkMCQ(index){
+    let val = Number(document.getElementById("opt"+index).getAttribute("data-value"));
+    let feedback = document.getElementById("mcqFeedback");
+
+    if(val === window.correctMCQ){
+        feedback.style.color = "limegreen";
+        feedback.innerText = "✓ Correct!";
+        document.getElementById("correctSound").play();
+    } else {
+        feedback.style.color = "red";
+        feedback.innerText = "✗ Wrong!";
+        document.getElementById("wrongSound").play();
+    }
+
+    setTimeout(() => {
+        feedback.innerText="";
+        generateMCQ();
+    }, 1000);
+}
+
+/* ---------------- Dark Mode ---------------- */
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
 </script>
 
 </body>
