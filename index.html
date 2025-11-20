@@ -1,503 +1,209 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Squares Trainer — Dark Fun</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fun Squares Trainer 🎉</title>
+
 <style>
-  /* ---------------- Theme (dark default) ---------------- */
-  :root{
-    --bg-1: #071021;        /* deep background */
-    --bg-2: linear-gradient(180deg,#071021,#07172a 45%,#061229);
-    --panel: rgba(255,255,255,0.03);
-    --glass: rgba(255,255,255,0.04);
-    --accent: #8b5cf6;      /* purple */
-    --accent-2: #06b6d4;    /* teal */
-    --muted: #9aa7b3;
-    --good: #39d98a;
-    --bad: #ff6b6b;
-    --card-glow: 0 8px 40px rgba(139,92,246,0.12);
-    --glass-border: rgba(255,255,255,0.04);
-    --radius: 14px;
-    --tap-scale: 0.985;
-    --shadow-lg: 0 20px 40px rgba(1,6,25,0.6);
+  body {
+    margin: 0;
+    font-family: "Comic Sans MS", sans-serif;
+    background: #fffbeb;
+    text-align: center;
+    padding: 20px;
   }
 
-  /* default dark mode applied (body has class "dark") */
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:var(--bg-2);-webkit-font-smoothing:antialiased}
-  body.dark{background:var(--bg-2);color:#e6eef8;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px 12px 90px;}
+  h1 {
+    font-size: 28px;
+    color: #ef4444;
+  }
 
-  /* Layout */
-  header{width:100%;max-width:980px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 4px;}
-  h1{margin:0;font-size:1.05rem;letter-spacing:0.3px}
-  .sub{color:var(--muted);font-size:13px;margin-top:4px}
-  .controls{display:flex;gap:8px;align-items:center}
+  .btn {
+    background: #f97316;
+    color: white;
+    padding: 14px 20px;
+    font-size: 18px;
+    border-radius: 12px;
+    border: none;
+    margin: 8px;
+    width: 80%;
+    max-width: 260px;
+    cursor: pointer;
+  }
 
-  /* Panels */
-  main{width:100%;max-width:980px;display:flex;flex-direction:column;gap:12px;margin-top:6px}
-  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015)); border-radius:var(--radius); padding:12px; box-shadow:var(--shadow-lg); border:1px solid var(--glass-border)}
-  .row{display:flex;gap:8px;align-items:center}
+  .btn:hover {
+    background: #ea580c;
+  }
 
-  /* Buttons */
-  .btn{background:linear-gradient(90deg,var(--accent),#5b21b6);color:white;border:0;padding:10px 14px;border-radius:12px;font-weight:700;box-shadow:var(--card-glow);cursor:pointer}
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
-  .btn.small{padding:8px 10px;border-radius:10px;font-size:13px}
-  .fab{position:fixed;right:18px;bottom:18px;background:linear-gradient(180deg,var(--accent),#6d28d9);width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;box-shadow:0 18px 40px rgba(99,102,241,0.18);z-index:999}
-  .fab:active{transform:scale(var(--tap-scale))}
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
 
-  /* Study grid */
-  .study-grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-  @media(min-width:560px){.study-grid{grid-template-columns:repeat(6,1fr)}}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:12px;text-align:center;cursor:pointer;user-select:none;transition:transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms}
-  .card:hover{transform:translateY(-6px)}
-  .card .num{font-weight:800;color:var(--accent);font-size:18px}
-  .card .sq{margin-top:6px;color:var(--muted);font-weight:700}
+  .card {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 15px;
+    border: 3px solid #fde047;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-size: 20px;
+    font-weight: bold;
+  }
 
-  /* Quiz area */
-  .question{font-size:20px;font-weight:900}
-  .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-  input[type="number"]{appearance:none;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:130px;text-align:center;font-weight:800;font-size:18px}
-  .feedback{min-height:28px;margin-top:10px;font-weight:800}
-  .hintBox{margin-top:10px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));color:var(--muted)}
+  .quiz-box {
+    margin-top: 20px;
+    font-size: 22px;
+  }
 
-  /* Timer ring */
-  .timerWrap{position:relative;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-  svg.timer{transform:rotate(-90deg)}
-  .timeNum{position:absolute;font-weight:900;font-size:13px;color:var(--muted)}
+  input {
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 18px;
+    width: 200px;
+    border-radius: 10px;
+    border: 2px solid #fbbf24;
+    text-align: center;
+  }
 
-  /* Toast / modal */
-  .centerModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10001;min-width:260px}
-  .popup{background:linear-gradient(180deg,#071126,#07142a);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 30px 80px rgba(2,6,23,0.7);text-align:center;color:#e6eef8}
+  .feedback {
+    margin-top: 15px;
+    font-size: 24px;
+  }
 
-  /* Confetti canvas full-screen */
-  #confettiCanvas{position:fixed;left:0;top:0;pointer-events:none;z-index:10000;width:100%;height:100%}
+  /* Confetti */
+  #confetti {
+    position: fixed;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+  }
 
-  /* small text utilities */
-  .muted{color:var(--muted)}
-  .small{font-size:13px}
-  .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:700}
-  .glow{box-shadow:0 8px 40px rgba(139,92,246,0.12)}
-  /* nice micro-interaction for options */
-  .option{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);font-weight:800}
-  .option:active{transform:scale(0.991)}
-  .badgeFloating{position:fixed;left:18px;bottom:18px;background:linear-gradient(90deg,#06b6d4,#10b981);padding:10px 12px;border-radius:14px;color:white;font-weight:900;z-index:999}
-  /* leaderboard list */
-  .leaderboard .row{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+  .hint-box {
+    margin-top: 12px;
+    font-size: 18px;
+    color: #2563eb;
+  }
 </style>
 </head>
-<body class="dark">
 
-<header>
-  <div>
-    <h1>Squares Trainer • Dark Mode</h1>
-    <div class="sub">Practice squares 2 → 50 — streaks, badges & leaderboard</div>
-  </div>
-  <div class="controls">
-    <button id="openLB" class="btn small">🏆 Leaderboard</button>
-    <button id="openSettings" class="btn small">⚙️</button>
-  </div>
-</header>
+<body>
 
-<main>
-  <!-- Level / Controls -->
-  <div class="panel row" style="justify-content:space-between;align-items:center">
-    <div class="row" style="gap:10px;align-items:center">
-      <div class="pill">Level</div>
-      <select id="level" class="pill" style="background:transparent;border:0;color:var(--muted);font-weight:800;padding:8px;border-radius:10px">
-        <option value="easy">Easy (2–20)</option>
-        <option value="medium">Medium (2–35)</option>
-        <option value="hard" selected>Hard (2–50)</option>
-      </select>
-      <div class="pill small muted" id="roundDisplay">Round: —</div>
-    </div>
+<h1>🎉 Fun Squares Trainer 🎉</h1>
 
-    <div class="row">
-      <button id="studyBtn" class="btn small">📘 Study</button>
-      <button id="startBtn" class="btn small">▶️ Start</button>
-      <button id="mcqBtn" class="btn small">❓ MCQ</button>
-    </div>
-  </div>
+<button class="btn" onclick="showLearn()">📘 Learn Squares</button>
+<button class="btn" onclick="startGame()">🎮 Play Game</button>
 
-  <!-- Study Panel -->
-  <section id="studyPanel" class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div class="small muted">Study mode — tap a card to reveal, long press to peek</div>
-      </div>
-      <div class="row">
-        <button id="shuffle" class="btn small">🔀 Shuffle</button>
-        <button id="hideAll" class="btn small">👁 Hide</button>
-      </div>
-    </div>
+<div id="learnSection" style="display:none;">
+  <h2>📘 Learn All Squares</h2>
+  <div class="card-grid" id="cardGrid"></div>
+</div>
 
-    <div id="studyGrid" class="study-grid" style="margin-top:12px"></div>
-  </section>
+<div id="gameSection" style="display:none;">
+  <h2>🎮 Game Time!</h2>
+  <div class="quiz-box" id="questionBox"></div>
+  <input type="number" id="answerInput" placeholder="Your answer">
+  <br>
+  <button class="btn" onclick="checkKidAnswer()">Submit</button>
+  <div class="feedback" id="feedback"></div>
+  <div class="hint-box" id="hintBox">Hint will appear here...</div>
+  <button class="btn" onclick="showHint()">💡 Hint</button>
+</div>
 
-  <!-- Quiz Panel -->
-  <section id="quizPanel" class="panel" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div class="question" id="qText">What is 2² ?</div>
-        <div class="small muted" id="qSub">Score: <b id="score">0</b> • Streak: <b id="streak">0</b></div>
-      </div>
-      <div class="timerWrap">
-        <svg class="timer" width="56" height="56">
-          <circle cx="28" cy="28" r="22" stroke="rgba(255,255,255,0.03)" stroke-width="8" fill="none"></circle>
-          <circle id="timerCircle" cx="28" cy="28" r="22" stroke="url(#grad)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="0"></circle>
-          <defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-        </svg>
-        <div class="timeNum" id="timeNum">18</div>
-      </div>
-    </div>
-
-    <div class="answer-row">
-      <input id="answer" type="number" placeholder="Answer" aria-label="answer">
-      <button id="submit" class="btn">Submit</button>
-      <button id="hint" class="btn small">💡 Hint</button>
-      <button id="steps" class="btn small">🧾 Steps</button>
-    </div>
-
-    <div class="feedback" id="feedback"></div>
-    <div class="hintBox" id="hintBox">Context-aware hints appear here</div>
-  </section>
-
-  <!-- MCQ Panel -->
-  <section id="mcqPanel" class="panel" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><div class="question" id="mcqQ">What is 2² ?</div><div class="small muted" id="mcqSub">MCQ Score: <b id="mcqScore">0</b></div></div>
-      <div class="small muted">Round <span id="mcqRound">1</span>/10</div>
-    </div>
-
-    <div style="margin-top:10px;display:grid;gap:10px">
-      <button class="option" id="o0"></button>
-      <button class="option" id="o1"></button>
-      <button class="option" id="o2"></button>
-      <button class="option" id="o3"></button>
-    </div>
-
-    <div class="feedback" id="mcqFeedback"></div>
-    <div class="hintBox" id="mcqHint">MCQ hints appear here</div>
-  </section>
-</main>
-
-<!-- Floating action & badge -->
-<div class="fab" id="fab">⭐</div>
-<div class="badgeFloating" id="badgeFloating" style="display:none">New badge!</div>
-
-<!-- Confetti canvas -->
-<canvas id="confettiCanvas"></canvas>
-
-<!-- modal area -->
-<div id="modalArea"></div>
+<canvas id="confetti"></canvas>
 
 <script>
-/* ------------------ Core data & utilities ------------------ */
-const MIN = 2;
-const MAX = 50;
-const LS = 'squares_trainer_dark_v1';
-let state = JSON.parse(localStorage.getItem(LS) || '{}') || {leaderboard:[],badges:{}};
-const levelSelect = document.getElementById('level');
-let maxN = 50; // default (hard)
-let pool = [];
+/* -------- Learn Mode -------- */
+function showLearn() {
+  document.getElementById("learnSection").style.display = "block";
+  document.getElementById("gameSection").style.display = "none";
 
-function buildPool(){
-  const level = levelSelect.value;
-  if(level==='easy') maxN = 20;
-  else if(level==='medium') maxN = 35;
-  else maxN = 50;
-  pool = Array.from({length: maxN - MIN + 1}, (_,i)=>MIN + i);
-}
-buildPool();
+  let grid = document.getElementById("cardGrid");
+  grid.innerHTML = "";
 
-/* ---------- Elements ---------- */
-const studyGrid = document.getElementById('studyGrid');
-const studyPanel = document.getElementById('studyPanel');
-const quizPanel = document.getElementById('quizPanel');
-const mcqPanel = document.getElementById('mcqPanel');
-
-const qText = document.getElementById('qText');
-const answer = document.getElementById('answer');
-const submit = document.getElementById('submit');
-const hintBtn = document.getElementById('hint');
-const stepsBtn = document.getElementById('steps');
-const hintBox = document.getElementById('hintBox');
-const feedback = document.getElementById('feedback');
-
-const timerCircle = document.getElementById('timerCircle');
-const timeNum = document.getElementById('timeNum');
-
-const scoreEl = document.getElementById('score');
-const streakEl = document.getElementById('streak');
-
-const mcqQ = document.getElementById('mcqQ');
-const mcqOpts = [document.getElementById('o0'),document.getElementById('o1'),document.getElementById('o2'),document.getElementById('o3')];
-const mcqHint = document.getElementById('mcqHint');
-const mcqFeedback = document.getElementById('mcqFeedback');
-const mcqScoreEl = document.getElementById('mcqScore');
-const mcqRoundEl = document.getElementById('mcqRound');
-
-/* confetti */
-const confettiCanvas = document.getElementById('confettiCanvas');
-const confettiCtx = confettiCanvas.getContext('2d');
-let confettiParts = [];
-function resizeCanvas(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-/* audio */
-let audioCtx = null;
-function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-function beep(freq=880,dur=0.07,vol=0.06){
-  ensureAudio();
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.type='sine'; o.frequency.value = freq; g.gain.value = vol;
-  o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);
-}
-function correctSound(){ beep(880,0.07,0.08); setTimeout(()=>beep(1320,0.05,0.06),90); }
-function wrongSound(){ beep(220,0.06,0.08); setTimeout(()=>beep(160,0.06,0.06),110); }
-
-/* ------------------ small visual confetti system ------------------ */
-function spawnConfetti(x,y,count=30){
-  for(let i=0;i<count;i++){
-    confettiParts.push({
-      x: x || (innerWidth*0.5) + (Math.random()-0.5)*200,
-      y: y || (innerHeight*0.4) + (Math.random()-0.5)*80,
-      vx: (Math.random()-0.5)*8, vy: -Math.random()*8 - 2,
-      r: Math.random()*6+4, col: `hsl(${Math.random()*360} 90% 65%)`, life: Math.random()*90+40
-    });
+  for (let i = 2; i <= 20; i++) {
+    let card = document.createElement("div");
+    card.className = "card";
+    card.innerText = `${i}² = ${i*i}`;
+    grid.appendChild(card);
   }
 }
-function runConfetti(){
-  confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-  for(let i=confettiParts.length-1;i>=0;i--){
-    const p = confettiParts[i];
-    p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.life--;
-    confettiCtx.fillStyle = p.col;
-    confettiCtx.beginPath(); confettiCtx.ellipse(p.x,p.y,p.r,p.r*0.6,0,0,Math.PI*2); confettiCtx.fill();
-    if(p.y > confettiCanvas.height+50 || p.life<=0) confettiParts.splice(i,1);
-  }
-  requestAnimationFrame(runConfetti);
-}
-runConfetti();
 
-/* ------------------ Study grid build ------------------ */
-function buildStudy(){
-  studyGrid.innerHTML = '';
-  pool.forEach(n=>{
-    const el = document.createElement('div'); el.className='card';
-    el.innerHTML = `<div class="num">${n}</div><div class="sq muted">●●●</div>`;
-    // click to reveal / toggle
-    el.addEventListener('click', ()=> {
-      const sq = el.querySelector('.sq');
-      if(sq.textContent.includes('●')) sq.textContent = n*n;
-      else sq.textContent = '●●●';
-      el.animate([{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:160});
-    });
-    // press and hold to preview (touchstart/touchend)
-    let pressTimer = null;
-    el.addEventListener('touchstart', ()=> {
-      pressTimer = setTimeout(()=> el.querySelector('.sq').textContent = n*n, 300);
-    });
-    el.addEventListener('touchend', ()=> { clearTimeout(pressTimer); });
-    studyGrid.appendChild(el);
-  });
-}
-buildStudy();
+/* -------- Game Mode -------- */
+let currentNum = 0;
 
-/* controls */
-document.getElementById('shuffle').onclick = ()=> { pool.sort(()=>Math.random()-0.5); buildStudy(); };
-document.getElementById('hideAll').onclick = ()=> { document.querySelectorAll('.sq').forEach(s=>s.textContent='●●●'); };
-
-/* when level changes */
-levelSelect.onchange = ()=> { buildPool(); buildStudy(); };
-
-/* ---------- Quiz logic ---------- */
-let current = null;
-let score = 0, streak = 0;
-let quizTimer = null, timerSeconds = 18, remaining = timerSeconds;
-
-function startQuiz(){
-  document.querySelector('main').scrollIntoView({behavior:'smooth'});
-  studyPanel.style.display = 'none'; mcqPanel.style.display = 'none'; quizPanel.style.display = 'block';
-  score = 0; streak = 0; updateScoreUI();
-  nextQ();
-}
-document.getElementById('startBtn').onclick = startQuiz;
-document.getElementById('studyBtn').onclick = ()=> { studyPanel.style.display='block'; quizPanel.style.display='none'; mcqPanel.style.display='none'; };
-document.getElementById('mcqBtn').onclick = ()=> startMCQ();
-
-/* pick random number */
-function pick(){ return pool[Math.floor(Math.random()*pool.length)]; }
-
-function nextQ(){
-  current = pick();
-  qText.textContent = `What is ${current}² ?`;
-  answer.value = '';
-  feedback.textContent = '';
-  hintBox.textContent = 'Tap Hint for a quick trick (non-spoiler).';
-  startTimer(timerSeconds);
-  answer.focus();
-}
-function updateScoreUI(){
-  scoreEl.textContent = score;
-  streakEl.textContent = streak;
+function startGame() {
+  document.getElementById("gameSection").style.display = "block";
+  document.getElementById("learnSection").style.display = "none";
+  nextQuestion();
 }
 
-/* timer visuals */
-function startTimer(sec){
-  if(quizTimer) clearInterval(quizTimer);
-  remaining = sec;
-  timeNum.textContent = remaining;
-  const c = 2*Math.PI*22;
-  timerCircle.style.strokeDasharray = c;
-  timerCircle.style.strokeDashoffset = 0;
-  quizTimer = setInterval(()=>{
-    remaining--;
-    timeNum.textContent = remaining;
-    const pct = 1 - (remaining/sec);
-    timerCircle.style.strokeDashoffset = c * pct;
-    if(remaining<=0){ clearInterval(quizTimer); submitAuto(); }
-  },1000);
+function nextQuestion() {
+  currentNum = Math.floor(Math.random() * 19) + 2; // 2–20
+  document.getElementById("questionBox").innerHTML = `What is <b>${currentNum}²</b> ?`;
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("hintBox").innerHTML = "Hint will appear here...";
+  document.getElementById("answerInput").value = "";
 }
-function stopTimer(){ if(quizTimer) clearInterval(quizTimer); }
 
-/* check answer */
-submit.addEventListener('click', ()=> { ensureAudio(); checkAnswer(); });
-answer.addEventListener('keypress', e=>{ if(e.key==='Enter'){ ensureAudio(); checkAnswer(); } });
+/* Hints for kids */
+function showHint() {
+  let last = currentNum % 10;
+  let hint = "";
 
-function checkAnswer(){
-  stopTimer();
-  const val = Number(answer.value);
-  const correct = current*current;
-  if(val === correct){
-    score += 10 * Math.min(5, Math.floor(streak/3)+1);
-    streak++;
-    updateScoreUI();
-    feedback.style.color = 'var(--good)'; feedback.textContent = '✓ Correct';
-    correctSound(); spawnConfetti(innerWidth/2, innerHeight/3, 40);
-    maybeBadge('first'); // example badge logic
+  if (last === 5) hint = "Numbers ending in 5 always end with 25!";
+  else if (last === 4) hint = "If ends with 4 → square ends with 6!";
+  else if (last === 6) hint = "If ends with 6 → square ends with 6!";
+  else if (currentNum < 10) hint = "Try multiplying small numbers in your head!";
+  else hint = "Break it: " + currentNum + " = " + Math.floor(currentNum/10) + " + " + (currentNum%10);
+
+  document.getElementById("hintBox").innerHTML = "💡 " + hint;
+}
+
+function checkKidAnswer() {
+  let ans = Number(document.getElementById("answerInput").value);
+  let correct = currentNum * currentNum;
+  let fb = document.getElementById("feedback");
+
+  if (ans === correct) {
+    fb.style.color = "green";
+    fb.innerHTML = "🌟 Correct! Great job! 🌟";
+    dropConfetti();
+    setTimeout(nextQuestion, 1200);
   } else {
-    feedback.style.color = 'var(--bad)'; feedback.textContent = `✗ Wrong — ${correct}`;
-    wrongSound();
-    streak = 0;
-    updateScoreUI();
-  }
-  setTimeout(nextQ, 900);
-}
-function submitAuto(){
-  feedback.style.color = 'var(--muted)'; feedback.textContent = '⏱️ Time up!';
-  wrongSound();
-  streak = 0; updateScoreUI();
-  setTimeout(nextQ,900);
-}
-
-/* hints: context-aware and random */
-const hints = [
-  "Squares never end in 2,3,7 or 8 — use this to check your answer.",
-  "If number ends with 5: (a5)² → a×(a+1) then append 25. Example: 45² → 2025.",
-  "Use (n−1)(n+1)+1 trick for many numbers.",
-  "Close to 50? Use 50²=2500 then adjust by difference*100 + diff²."
-];
-function contextHint(n){
-  if(String(n).endsWith('5')) return `Ends with 5 → (a×(a+1)) then add 25. For ${n}: ${Math.floor(n/10)}×${Math.floor(n/10)+1} then append 25 → ${Math.floor(n/10)*(Math.floor(n/10)+1)}25`;
-  if(Math.abs(n-50)<=5){ const d = n-50; return `Near 50 → 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`; }
-  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
-  return `Last-digit trick: number ends with ${n%10}, square ends with ${endings[n%10]}`;
-}
-hintBtn.addEventListener('click', ()=> {
-  if(current) hintBox.textContent = 'Hint: ' + contextHint(current);
-  else hintBox.textContent = 'Hint: ' + hints[Math.floor(Math.random()*hints.length)];
-});
-stepsBtn.addEventListener('click', ()=> {
-  if(current) hintBox.textContent = 'Steps: ' + stepExplanation(current);
-  else hintBox.textContent = 'Start a round to see steps';
-});
-function stepExplanation(n){
-  if(String(n).endsWith('5')){ const a=Math.floor(n/10); return `${n}² → ${a}×${a+1} = ${a*(a+1)} → append 25 = ${a*(a+1)}25`; }
-  if(Math.abs(n-50)<=5){ const d=n-50; return `${n}² → 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`; }
-  const t = Math.floor(n/10)*10, u = n%10; return `${n}² = (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`;
-}
-
-/* ---------- MCQ mode ---------- */
-let mcqScore = 0, mcqRound = 0, mcqCurrent = null;
-function startMCQ(){
-  studyPanel.style.display='none'; quizPanel.style.display='none'; mcqPanel.style.display='block';
-  mcqScore = 0; mcqRound = 0; mcqNext();
-}
-function mcqNext(){
-  mcqRound++; mcqRoundEl.textContent = mcqRound;
-  mcqCurrent = pick(); mcqQ.textContent = `What is ${mcqCurrent}² ?`;
-  const correct = mcqCurrent*mcqCurrent;
-  let opts = new Set([correct]);
-  while(opts.size<4){
-    const delta = (Math.floor(Math.random()*11)-5) * (Math.floor(Math.random()*7)+1);
-    opts.add(Math.abs(correct + delta));
-  }
-  const arr = Array.from(opts).sort(()=>Math.random()-0.5);
-  mcqOpts.forEach((btn,idx)=>{ btn.textContent = arr[idx]; btn.onclick = ()=> mcqCheck(arr[idx]); });
-  mcqFeedback.textContent = ''; mcqHint.textContent = 'Tap hint for context';
-  if(mcqRound>10){ endMCQ(); }
-}
-function mcqCheck(val){
-  const corr = mcqCurrent*mcqCurrent;
-  if(val === corr){ mcqScore += 10; mcqFeedback.style.color = 'var(--good)'; mcqFeedback.textContent = '✓ Correct'; correctSound(); spawnConfetti(innerWidth/2, innerHeight/3, 30); }
-  else { mcqFeedback.style.color = 'var(--bad)'; mcqFeedback.textContent = `✗ Wrong — ${corr}`; wrongSound(); }
-  mcqScoreEl.textContent = mcqScore;
-  setTimeout(()=> { if(mcqRound<10) mcqNext(); else endMCQ(); }, 800);
-}
-function endMCQ(){ // push to leaderboard
-  state.leaderboard = state.leaderboard || [];
-  state.leaderboard.push({score:mcqScore, date:new Date().toISOString()});
-  state.leaderboard.sort((a,b)=>b.score-a.score); if(state.leaderboard.length>10) state.leaderboard.length=10;
-  localStorage.setItem(LS, JSON.stringify(state));
-  showModal(`<div style="font-weight:900">MCQ Round Complete</div><div style="margin-top:8px">Score: <b>${mcqScore}</b></div><div style="margin-top:10px"><button onclick="closeModal()" class="btn">Close</button></div>`);
-}
-
-/* ---------- tiny leaderboard & badges ---------- */
-document.getElementById('openLB').onclick = showLeaderboard;
-function showLeaderboard(){
-  const lb = state.leaderboard || [];
-  const rows = lb.map((r,i)=>`<div class="row"><div>#${i+1} ${r.name||'Player'}</div><div><b>${r.score}</b></div></div>`).join('');
-  showModal(`<div style="font-weight:900">🏆 Leaderboard</div><div style="margin-top:10px" class="leaderboard">${rows || '<div class="small muted">No scores yet</div>'}</div><div style="margin-top:12px"><button onclick="closeModal()" class="btn">Close</button></div>`);
-}
-
-function maybeBadge(key){
-  if(!state.badges) state.badges = {};
-  if(!state.badges[key]) {
-    state.badges[key]=true; localStorage.setItem(LS, JSON.stringify(state));
-    document.getElementById('badgeFloating').style.display='block';
-    document.getElementById('badgeFloating').textContent = '🏅 New badge!';
-    setTimeout(()=> document.getElementById('badgeFloating').style.display='none', 2200);
+    fb.style.color = "red";
+    fb.innerHTML = "😢 Oops! Try again!";
   }
 }
 
-/* ---------- modal helpers ---------- */
-function showModal(html){
-  const area = document.getElementById('modalArea');
-  const div = document.createElement('div'); div.className='centerModal';
-  div.innerHTML = `<div class="popup">${html}</div>`;
-  area.appendChild(div);
+/* -------- Confetti -------- */
+let confettiCanvas = document.getElementById("confetti");
+let ctx = confettiCanvas.getContext("2d");
+
+function dropConfetti() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+
+  for (let i = 0; i < 150; i++) {
+    drawConfetti();
+  }
+
+  setTimeout(() => ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height), 1000);
 }
-function closeModal(){ document.getElementById('modalArea').innerHTML=''; }
 
-/* ---------- simple save/load ---------- */
-function saveState(){ localStorage.setItem(LS, JSON.stringify(state)); }
+function drawConfetti() {
+  let x = Math.random() * confettiCanvas.width;
+  let y = Math.random() * confettiCanvas.height;
+  let size = Math.random() * 6 + 3;
 
-/* ---------- init ---------- */
-document.getElementById('startBtn').addEventListener('click', ()=> { ensureAudio(); startQuiz(); });
-document.getElementById('shuffle').addEventListener('click', ()=> { pool.sort(()=>Math.random()-0.5); buildStudy(); });
-document.getElementById('fab').addEventListener('click', ()=> { showModal('<div style="font-weight:900">Daily Tip</div><div style="margin-top:8px">Practice 10 mins — aim for 5-in-a-row!</div><div style="margin-top:10px"><button onclick="closeModal()" class="btn">Got it</button></div>'); });
-
-/* small helpers to run confetti from code above scope */
-function spawnConfetti(x,y,count){ /* stub - real implementation above will still work since function already defined */ }
-
-/* expose some functions (so modal buttons can call closeModal) */
-window.closeModal = closeModal;
-
-/* greet on first run */
-if(!localStorage.getItem('squares_welcome_shown')){
-  localStorage.setItem('squares_welcome_shown','1');
-  setTimeout(()=> spawnConfetti(innerWidth/2, innerHeight/3, 80), 600);
+  ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+  ctx.fillRect(x, y, size, size);
 }
 </script>
+
 </body>
 </html>
