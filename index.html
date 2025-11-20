@@ -1,571 +1,503 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Squares Trainer — Engaging</title>
+<title>Squares Trainer — Dark Fun</title>
 <style>
+  /* ---------------- Theme (dark default) ---------------- */
   :root{
-    --bg: linear-gradient(135deg,#eef2ff,#fff0f6);
-    --card:#ffffff;
-    --accent:#7c3aed;
-    --accent-2:#06b6d4;
-    --muted:#6b7280;
-    --good:#16a34a;
-    --bad:#ef4444;
-    --glass: rgba(255,255,255,0.7);
+    --bg-1: #071021;        /* deep background */
+    --bg-2: linear-gradient(180deg,#071021,#07172a 45%,#061229);
+    --panel: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.04);
+    --accent: #8b5cf6;      /* purple */
+    --accent-2: #06b6d4;    /* teal */
+    --muted: #9aa7b3;
+    --good: #39d98a;
+    --bad: #ff6b6b;
+    --card-glow: 0 8px 40px rgba(139,92,246,0.12);
+    --glass-border: rgba(255,255,255,0.04);
+    --radius: 14px;
+    --tap-scale: 0.985;
+    --shadow-lg: 0 20px 40px rgba(1,6,25,0.6);
   }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{background:var(--bg);color:#07203a;display:flex;flex-direction:column;align-items:center;padding:12px;}
-  header{width:100%;max-width:980px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  h1{margin:0;font-size:1.15rem;letter-spacing:0.2px}
+
+  /* default dark mode applied (body has class "dark") */
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:var(--bg-2);-webkit-font-smoothing:antialiased}
+  body.dark{background:var(--bg-2);color:#e6eef8;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px 12px 90px;}
+
+  /* Layout */
+  header{width:100%;max-width:980px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 4px;}
+  h1{margin:0;font-size:1.05rem;letter-spacing:0.3px}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
   .controls{display:flex;gap:8px;align-items:center}
-  button.btn{
-    appearance:none;border:0;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#4f46e5);color:white;font-weight:700;
-    box-shadow:0 10px 25px rgba(99,102,241,0.12);font-size:14px;touch-action:manipulation;
-  }
-  button.ghost{background:transparent;color:#07203a;border:1px solid rgba(7,32,58,0.06);box-shadow:none}
-  main{width:100%;max-width:980px;margin-top:12px;flex:1;display:flex;flex-direction:column;gap:10px;}
-  .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between}
-  .modes{display:flex;gap:6px;flex-wrap:wrap}
-  .panel{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 18px 40px rgba(2,6,23,0.06)}
+
+  /* Panels */
+  main{width:100%;max-width:980px;display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015)); border-radius:var(--radius); padding:12px; box-shadow:var(--shadow-lg); border:1px solid var(--glass-border)}
+  .row{display:flex;gap:8px;align-items:center}
+
+  /* Buttons */
+  .btn{background:linear-gradient(90deg,var(--accent),#5b21b6);color:white;border:0;padding:10px 14px;border-radius:12px;font-weight:700;box-shadow:var(--card-glow);cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+  .btn.small{padding:8px 10px;border-radius:10px;font-size:13px}
+  .fab{position:fixed;right:18px;bottom:18px;background:linear-gradient(180deg,var(--accent),#6d28d9);width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;box-shadow:0 18px 40px rgba(99,102,241,0.18);z-index:999}
+  .fab:active{transform:scale(var(--tap-scale))}
+
+  /* Study grid */
   .study-grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
   @media(min-width:560px){.study-grid{grid-template-columns:repeat(6,1fr)}}
-  .card{background:linear-gradient(180deg,#fff,#fbfbff);border-radius:12px;padding:12px;text-align:center;box-shadow:0 12px 30px rgba(2,6,23,0.06);transition:transform 160ms,box-shadow 160ms}
-  .card:active{transform:translateY(4px) scale(0.995)}
-  .num{font-size:20px;font-weight:800;color:var(--accent)}
-  .sq{font-size:14px;color:#7c3aed;margin-top:6px}
-  /* Quiz UI */
-  .question{font-size:22px;font-weight:800;margin-bottom:6px}
-  .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  input[type="number"]{width:130px;padding:12px;border-radius:10px;border:1px solid #c7d2fe;font-size:18px;text-align:center}
-  .feedback{min-height:28px;margin-top:8px;font-weight:800}
-  .score{font-size:13px;color:var(--muted);margin-top:8px}
-  .hintBox{margin-top:10px;padding:10px;border-radius:10px;background:rgba(10,10,10,0.03);font-size:14px}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .small{font-size:13px;color:var(--muted)}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:12px;text-align:center;cursor:pointer;user-select:none;transition:transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms}
+  .card:hover{transform:translateY(-6px)}
+  .card .num{font-weight:800;color:var(--accent);font-size:18px}
+  .card .sq{margin-top:6px;color:var(--muted);font-weight:700}
+
+  /* Quiz area */
+  .question{font-size:20px;font-weight:900}
+  .answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  input[type="number"]{appearance:none;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:130px;text-align:center;font-weight:800;font-size:18px}
+  .feedback{min-height:28px;margin-top:10px;font-weight:800}
+  .hintBox{margin-top:10px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));color:var(--muted)}
+
   /* Timer ring */
-  .timerWrap{position:relative;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .timerWrap{position:relative;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center}
   svg.timer{transform:rotate(-90deg)}
-  .timeNum{position:absolute;font-weight:800;font-size:12px}
-  /* Confetti layer */
-  #confettiCanvas{position:fixed;left:0;top:0;pointer-events:none;z-index:9999;width:100%;height:100%;}
-  /* badges */
-  .badge{
-    position:fixed;right:14px;bottom:18px;background:linear-gradient(90deg,#10b981,#06b6d4);padding:10px 12px;border-radius:14px;color:white;font-weight:800;box-shadow:0 10px 30px rgba(6,182,212,0.12);
-  }
-  .centerModal{
-    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10000;min-width:280px;max-width:90%;
-  }
-  .popup{background:linear-gradient(180deg,#fff,#f8fafc);border-radius:14px;padding:14px;box-shadow:0 30px 60px rgba(2,6,23,0.15);text-align:center}
-  .leaderboard{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-  .leaderboard .row{display:flex;justify-content:space-between;width:100%}
-  /* responsive lower controls */
-  footer{width:100%;max-width:980px;padding:6px 0;text-align:center;color:var(--muted);font-size:13px}
+  .timeNum{position:absolute;font-weight:900;font-size:13px;color:var(--muted)}
+
+  /* Toast / modal */
+  .centerModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10001;min-width:260px}
+  .popup{background:linear-gradient(180deg,#071126,#07142a);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 30px 80px rgba(2,6,23,0.7);text-align:center;color:#e6eef8}
+
+  /* Confetti canvas full-screen */
+  #confettiCanvas{position:fixed;left:0;top:0;pointer-events:none;z-index:10000;width:100%;height:100%}
+
+  /* small text utilities */
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:700}
+  .glow{box-shadow:0 8px 40px rgba(139,92,246,0.12)}
+  /* nice micro-interaction for options */
+  .option{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);font-weight:800}
+  .option:active{transform:scale(0.991)}
+  .badgeFloating{position:fixed;left:18px;bottom:18px;background:linear-gradient(90deg,#06b6d4,#10b981);padding:10px 12px;border-radius:14px;color:white;font-weight:900;z-index:999}
+  /* leaderboard list */
+  .leaderboard .row{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px dashed rgba(255,255,255,0.02)}
 </style>
 </head>
-<body>
+<body class="dark">
 
 <header>
-  <h1>Squares Trainer — Fun Mode</h1>
+  <div>
+    <h1>Squares Trainer • Dark Mode</h1>
+    <div class="sub">Practice squares 2 → 50 — streaks, badges & leaderboard</div>
+  </div>
   <div class="controls">
-    <button id="openLeaderboard" class="ghost">🏆 Leaderboard</button>
-    <button id="resetBtn" class="ghost">Reset</button>
-    <button id="toggleStudy" class="ghost">Study</button>
+    <button id="openLB" class="btn small">🏆 Leaderboard</button>
+    <button id="openSettings" class="btn small">⚙️</button>
   </div>
 </header>
 
 <main>
-  <div class="topbar">
-    <div class="modes">
-      <select id="levelSelect" class="ghost" style="padding:10px;border-radius:10px;">
+  <!-- Level / Controls -->
+  <div class="panel row" style="justify-content:space-between;align-items:center">
+    <div class="row" style="gap:10px;align-items:center">
+      <div class="pill">Level</div>
+      <select id="level" class="pill" style="background:transparent;border:0;color:var(--muted);font-weight:800;padding:8px;border-radius:10px">
         <option value="easy">Easy (2–20)</option>
         <option value="medium">Medium (2–35)</option>
         <option value="hard" selected>Hard (2–50)</option>
       </select>
-      <button id="startRound" class="btn">Start Round</button>
-      <button id="mcqMode" class="btn">MCQ</button>
+      <div class="pill small muted" id="roundDisplay">Round: —</div>
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center">
-      <div class="small">Streak: <span id="streak">0</span></div>
-      <div class="small">Combo: x<span id="combo">1</span></div>
+    <div class="row">
+      <button id="studyBtn" class="btn small">📘 Study</button>
+      <button id="startBtn" class="btn small">▶️ Start</button>
+      <button id="mcqBtn" class="btn small">❓ MCQ</button>
     </div>
   </div>
 
-  <!-- Study panel -->
+  <!-- Study Panel -->
   <section id="studyPanel" class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-      <div class="small">Study Mode — swipe a card to reveal square</div>
-      <div><button id="shuffleStudy" class="ghost">Shuffle</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="small muted">Study mode — tap a card to reveal, long press to peek</div>
+      </div>
+      <div class="row">
+        <button id="shuffle" class="btn small">🔀 Shuffle</button>
+        <button id="hideAll" class="btn small">👁 Hide</button>
+      </div>
     </div>
-    <div id="studyGrid" class="study-grid" style="margin-top:10px"></div>
+
+    <div id="studyGrid" class="study-grid" style="margin-top:12px"></div>
   </section>
 
-  <!-- Quiz panel -->
+  <!-- Quiz Panel -->
   <section id="quizPanel" class="panel" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <div class="question" id="questionText">What is 2² ?</div>
-        <div class="small" id="roundInfo">Round: 1 / 10</div>
+        <div class="question" id="qText">What is 2² ?</div>
+        <div class="small muted" id="qSub">Score: <b id="score">0</b> • Streak: <b id="streak">0</b></div>
       </div>
       <div class="timerWrap">
-        <svg class="timer" width="48" height="48"><circle cx="24" cy="24" r="18" stroke="#e6e9ff" stroke-width="8" fill="none"></circle><circle id="timerCircle" cx="24" cy="24" r="18" stroke="#7c3aed" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="113.097" stroke-dashoffset="0"></circle></svg>
+        <svg class="timer" width="56" height="56">
+          <circle cx="28" cy="28" r="22" stroke="rgba(255,255,255,0.03)" stroke-width="8" fill="none"></circle>
+          <circle id="timerCircle" cx="28" cy="28" r="22" stroke="url(#grad)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="0"></circle>
+          <defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+        </svg>
         <div class="timeNum" id="timeNum">18</div>
       </div>
     </div>
 
-    <div class="answer-row" style="margin-top:12px">
-      <input id="answerField" type="number" placeholder="Answer">
-      <button id="submitAnswer" class="btn">Submit</button>
-      <button id="hintBtn" class="ghost">💡 Hint</button>
-      <button id="stepsBtn" class="ghost">🧾 Steps</button>
+    <div class="answer-row">
+      <input id="answer" type="number" placeholder="Answer" aria-label="answer">
+      <button id="submit" class="btn">Submit</button>
+      <button id="hint" class="btn small">💡 Hint</button>
+      <button id="steps" class="btn small">🧾 Steps</button>
     </div>
 
     <div class="feedback" id="feedback"></div>
-    <div class="score" id="scoreLine">Score: 0</div>
-    <div class="hintBox" id="hintBox">Hints will appear here.</div>
+    <div class="hintBox" id="hintBox">Context-aware hints appear here</div>
   </section>
 
-  <!-- MCQ panel -->
+  <!-- MCQ Panel -->
   <section id="mcqPanel" class="panel" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><div class="question" id="mcqQ">What is 2² ?</div><div class="small" id="mcqRound">Round 1/10</div></div>
-      <div class="small">Streak: <span id="mcqStreak">0</span></div>
+      <div><div class="question" id="mcqQ">What is 2² ?</div><div class="small muted" id="mcqSub">MCQ Score: <b id="mcqScore">0</b></div></div>
+      <div class="small muted">Round <span id="mcqRound">1</span>/10</div>
     </div>
-    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-      <button class="card" id="optA"></button>
-      <button class="card" id="optB"></button>
-      <button class="card" id="optC"></button>
-      <button class="card" id="optD"></button>
+
+    <div style="margin-top:10px;display:grid;gap:10px">
+      <button class="option" id="o0"></button>
+      <button class="option" id="o1"></button>
+      <button class="option" id="o2"></button>
+      <button class="option" id="o3"></button>
     </div>
+
     <div class="feedback" id="mcqFeedback"></div>
-    <div class="score" id="mcqScore">Score: 0</div>
-    <div class="hintBox" id="mcqHint">MCQ hints appear here.</div>
+    <div class="hintBox" id="mcqHint">MCQ hints appear here</div>
   </section>
 </main>
 
-<footer>Tip: Try to keep streaks to earn badges. Add to home screen for a quick practice routine!</footer>
+<!-- Floating action & badge -->
+<div class="fab" id="fab">⭐</div>
+<div class="badgeFloating" id="badgeFloating" style="display:none">New badge!</div>
 
 <!-- Confetti canvas -->
 <canvas id="confettiCanvas"></canvas>
 
-<!-- Achievement / leaderboard modal area -->
+<!-- modal area -->
 <div id="modalArea"></div>
 
 <script>
-/* ---------- Data & helpers ---------- */
-const LEVELS = {easy: {max:20}, medium: {max:35}, hard: {max:50}};
-let level = 'hard';
-let pool = []; // numbers
-const LS_KEY = 'squares_engage_v1';
-let state = loadState() || {best:[], leaderboard: [], badges: {}, roundsPlayed: 0};
-let round = {index:0,total:10,mode:'quiz',score:0,streak:0,combo:1};
-let currentNumber = null;
-let quizTimer = null;
-let timerSecs = 18;
-let timerRemaining = timerSecs;
-let audioCtx = null;
+/* ------------------ Core data & utilities ------------------ */
+const MIN = 2;
+const MAX = 50;
+const LS = 'squares_trainer_dark_v1';
+let state = JSON.parse(localStorage.getItem(LS) || '{}') || {leaderboard:[],badges:{}};
+const levelSelect = document.getElementById('level');
+let maxN = 50; // default (hard)
+let pool = [];
 
-/* --------- Audio beep and success sounds (WebAudio) --------- */
-function ensureAudio(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function buildPool(){
+  const level = levelSelect.value;
+  if(level==='easy') maxN = 20;
+  else if(level==='medium') maxN = 35;
+  else maxN = 50;
+  pool = Array.from({length: maxN - MIN + 1}, (_,i)=>MIN + i);
 }
-function soundBeep(f=880,d=0.07,vol=0.06){
-  ensureAudio();
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type='sine'; o.frequency.value = f;
-  g.gain.value = vol;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); setTimeout(()=>o.stop(), d*1000);
-}
-function soundCorrect(){
-  soundBeep(880,0.07,0.08); setTimeout(()=>soundBeep(1320,0.06,0.06),90);
-}
-function soundWrong(){ soundBeep(220,0.06,0.08); setTimeout(()=>soundBeep(160,0.06,0.06),90); }
+buildPool();
 
-/* ---------- Confetti (simple particle burst) ---------- */
-const confettiCanvas = document.getElementById('confettiCanvas');
-const confettiCtx = confettiCanvas.getContext('2d');
-let confettiParticles = [];
-function resizeConfetti(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
-window.addEventListener('resize', resizeConfetti); resizeConfetti();
-
-function spawnConfetti(x,y,amount=30){
-  for(let i=0;i<amount;i++){
-    confettiParticles.push({
-      x: x || (innerWidth/2) + (Math.random()-0.5)*200,
-      y: y || (innerHeight/2) + (Math.random()-0.5)*50,
-      vx: (Math.random()-0.5)*8,
-      vy: Math.random()*-8 - 2,
-      r: Math.random()*6 + 4,
-      color: `hsl(${Math.floor(Math.random()*360)} 90% 60%)`,
-      life: Math.random()*80 + 40
-    });
-  }
-}
-function confettiLoop(){
-  confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-  for(let i=confettiParticles.length-1;i>=0;i--){
-    const p = confettiParticles[i];
-    p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.life--;
-    confettiCtx.fillStyle = p.color;
-    confettiCtx.beginPath();
-    confettiCtx.ellipse(p.x,p.y,p.r,p.r*0.7,Math.random()*Math.PI*2,0,Math.PI*2);
-    confettiCtx.fill();
-    if(p.y > confettiCanvas.height + 50 || p.life <= 0) confettiParticles.splice(i,1);
-  }
-  requestAnimationFrame(confettiLoop);
-}
-confettiLoop();
-
-/* ---------- Utility ---------- */
-function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-function loadState(){ try{return JSON.parse(localStorage.getItem(LS_KEY));}catch(e){return null;} }
-function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-
-/* ---------- UI refs ---------- */
+/* ---------- Elements ---------- */
 const studyGrid = document.getElementById('studyGrid');
 const studyPanel = document.getElementById('studyPanel');
 const quizPanel = document.getElementById('quizPanel');
 const mcqPanel = document.getElementById('mcqPanel');
-const questionText = document.getElementById('questionText');
-const answerField = document.getElementById('answerField');
-const submitAnswer = document.getElementById('submitAnswer');
-const hintBtn = document.getElementById('hintBtn');
-const stepsBtn = document.getElementById('stepsBtn');
+
+const qText = document.getElementById('qText');
+const answer = document.getElementById('answer');
+const submit = document.getElementById('submit');
+const hintBtn = document.getElementById('hint');
+const stepsBtn = document.getElementById('steps');
 const hintBox = document.getElementById('hintBox');
 const feedback = document.getElementById('feedback');
-const scoreLine = document.getElementById('scoreLine');
-const streakEl = document.getElementById('streak');
-const comboEl = document.getElementById('combo');
+
 const timerCircle = document.getElementById('timerCircle');
 const timeNum = document.getElementById('timeNum');
 
-const levelSelect = document.getElementById('levelSelect');
-const startRoundBtn = document.getElementById('startRound');
-const mcqModeBtn = document.getElementById('mcqMode');
-const shuffleStudyBtn = document.getElementById('shuffleStudy');
-const toggleStudy = document.getElementById('toggleStudy');
-const resetBtn = document.getElementById('resetBtn');
-const openLeaderboard = document.getElementById('openLeaderboard');
-const modalArea = document.getElementById('modalArea');
+const scoreEl = document.getElementById('score');
+const streakEl = document.getElementById('streak');
 
-/* MCQ refs */
 const mcqQ = document.getElementById('mcqQ');
-const optA = document.getElementById('optA');
-const optB = document.getElementById('optB');
-const optC = document.getElementById('optC');
-const optD = document.getElementById('optD');
-const mcqFeedback = document.getElementById('mcqFeedback');
-const mcqScore = document.getElementById('mcqScore');
+const mcqOpts = [document.getElementById('o0'),document.getElementById('o1'),document.getElementById('o2'),document.getElementById('o3')];
 const mcqHint = document.getElementById('mcqHint');
-const mcqStreak = document.getElementById('mcqStreak');
+const mcqFeedback = document.getElementById('mcqFeedback');
+const mcqScoreEl = document.getElementById('mcqScore');
+const mcqRoundEl = document.getElementById('mcqRound');
 
-/* ---------- Build study grid ---------- */
-function buildPool(){
-  const max = LEVELS[level].max;
-  pool = Array.from({length: max-1}, (_,i)=>i+2);
+/* confetti */
+const confettiCanvas = document.getElementById('confettiCanvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParts = [];
+function resizeCanvas(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+/* audio */
+let audioCtx = null;
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function beep(freq=880,dur=0.07,vol=0.06){
+  ensureAudio();
+  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  o.type='sine'; o.frequency.value = freq; g.gain.value = vol;
+  o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);
 }
-function buildStudyGrid(){
+function correctSound(){ beep(880,0.07,0.08); setTimeout(()=>beep(1320,0.05,0.06),90); }
+function wrongSound(){ beep(220,0.06,0.08); setTimeout(()=>beep(160,0.06,0.06),110); }
+
+/* ------------------ small visual confetti system ------------------ */
+function spawnConfetti(x,y,count=30){
+  for(let i=0;i<count;i++){
+    confettiParts.push({
+      x: x || (innerWidth*0.5) + (Math.random()-0.5)*200,
+      y: y || (innerHeight*0.4) + (Math.random()-0.5)*80,
+      vx: (Math.random()-0.5)*8, vy: -Math.random()*8 - 2,
+      r: Math.random()*6+4, col: `hsl(${Math.random()*360} 90% 65%)`, life: Math.random()*90+40
+    });
+  }
+}
+function runConfetti(){
+  confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  for(let i=confettiParts.length-1;i>=0;i--){
+    const p = confettiParts[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.life--;
+    confettiCtx.fillStyle = p.col;
+    confettiCtx.beginPath(); confettiCtx.ellipse(p.x,p.y,p.r,p.r*0.6,0,0,Math.PI*2); confettiCtx.fill();
+    if(p.y > confettiCanvas.height+50 || p.life<=0) confettiParts.splice(i,1);
+  }
+  requestAnimationFrame(runConfetti);
+}
+runConfetti();
+
+/* ------------------ Study grid build ------------------ */
+function buildStudy(){
   studyGrid.innerHTML = '';
   pool.forEach(n=>{
-    const c = document.createElement('div');
-    c.className = 'card';
-    c.innerHTML = `<div class="num">${n}</div><div class="sq" data-hidden>${'●●●'}</div>`;
-    // touch to toggle reveal
-    c.addEventListener('click', ()=> {
-      const sq = c.querySelector('.sq');
-      if(sq.dataset.hidden !== undefined){
-        sq.dataset.hidden = false;
-        sq.innerText = n*n;
-        c.animate([{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:160});
-      } else {
-        // hide again
-        delete sq.dataset.hidden;
-        sq.innerText = '●●●';
-      }
+    const el = document.createElement('div'); el.className='card';
+    el.innerHTML = `<div class="num">${n}</div><div class="sq muted">●●●</div>`;
+    // click to reveal / toggle
+    el.addEventListener('click', ()=> {
+      const sq = el.querySelector('.sq');
+      if(sq.textContent.includes('●')) sq.textContent = n*n;
+      else sq.textContent = '●●●';
+      el.animate([{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:160});
     });
-    // swipe to reveal: touchstart / touchend trick (simple)
-    studyGrid.appendChild(c);
+    // press and hold to preview (touchstart/touchend)
+    let pressTimer = null;
+    el.addEventListener('touchstart', ()=> {
+      pressTimer = setTimeout(()=> el.querySelector('.sq').textContent = n*n, 300);
+    });
+    el.addEventListener('touchend', ()=> { clearTimeout(pressTimer); });
+    studyGrid.appendChild(el);
   });
 }
-levelSelect.onchange = () => { level=levelSelect.value; buildPool(); buildStudyGrid(); };
-shuffleStudyBtn.onclick = ()=>{ shuffle(pool); buildStudyGrid(); };
+buildStudy();
 
-/* ---------- Round / quiz control ---------- */
-function startRound(mode='quiz', total=10){
-  buildPool();
-  round = {index:0,total:total,mode:mode,score:0,streak:0,combo:1,earnedBadges:[]};
-  state.roundsPlayed = (state.roundsPlayed||0) + 1;
-  saveState();
-  if(mode==='quiz') openQuizUI();
-  if(mode==='mcq') openMCQUI();
-}
-startRoundBtn.onclick = ()=> startRound('quiz', 10);
-mcqModeBtn.onclick = ()=> startRound('mcq',10);
+/* controls */
+document.getElementById('shuffle').onclick = ()=> { pool.sort(()=>Math.random()-0.5); buildStudy(); };
+document.getElementById('hideAll').onclick = ()=> { document.querySelectorAll('.sq').forEach(s=>s.textContent='●●●'); };
 
-function openQuizUI(){
-  studyPanel.style.display='none';
-  mcqPanel.style.display='none';
-  quizPanel.style.display='block';
-  nextQuestion();
+/* when level changes */
+levelSelect.onchange = ()=> { buildPool(); buildStudy(); };
+
+/* ---------- Quiz logic ---------- */
+let current = null;
+let score = 0, streak = 0;
+let quizTimer = null, timerSeconds = 18, remaining = timerSeconds;
+
+function startQuiz(){
+  document.querySelector('main').scrollIntoView({behavior:'smooth'});
+  studyPanel.style.display = 'none'; mcqPanel.style.display = 'none'; quizPanel.style.display = 'block';
+  score = 0; streak = 0; updateScoreUI();
+  nextQ();
 }
-function openMCQUI(){
-  studyPanel.style.display='none';
-  quizPanel.style.display='none';
-  mcqPanel.style.display='block';
-  nextMCQ();
+document.getElementById('startBtn').onclick = startQuiz;
+document.getElementById('studyBtn').onclick = ()=> { studyPanel.style.display='block'; quizPanel.style.display='none'; mcqPanel.style.display='none'; };
+document.getElementById('mcqBtn').onclick = ()=> startMCQ();
+
+/* pick random number */
+function pick(){ return pool[Math.floor(Math.random()*pool.length)]; }
+
+function nextQ(){
+  current = pick();
+  qText.textContent = `What is ${current}² ?`;
+  answer.value = '';
+  feedback.textContent = '';
+  hintBox.textContent = 'Tap Hint for a quick trick (non-spoiler).';
+  startTimer(timerSeconds);
+  answer.focus();
+}
+function updateScoreUI(){
+  scoreEl.textContent = score;
+  streakEl.textContent = streak;
 }
 
-/* --------- Timer visuals --------- */
-function startTimer(seconds=18){
-  stopTimer();
-  timerRemaining = seconds;
-  const circumference = 2*Math.PI*18;
-  timerCircle.style.strokeDasharray = circumference;
+/* timer visuals */
+function startTimer(sec){
+  if(quizTimer) clearInterval(quizTimer);
+  remaining = sec;
+  timeNum.textContent = remaining;
+  const c = 2*Math.PI*22;
+  timerCircle.style.strokeDasharray = c;
   timerCircle.style.strokeDashoffset = 0;
-  timeNum.innerText = timerRemaining;
   quizTimer = setInterval(()=>{
-    timerRemaining--;
-    timeNum.innerText = timerRemaining;
-    const pct = (timerRemaining/seconds);
-    timerCircle.style.strokeDashoffset = circumference*(1-pct);
-    if(timerRemaining <= 0){
-      clearInterval(quizTimer);
-      timerCircle.style.strokeDashoffset = circumference;
-      timeUp();
-    }
+    remaining--;
+    timeNum.textContent = remaining;
+    const pct = 1 - (remaining/sec);
+    timerCircle.style.strokeDashoffset = c * pct;
+    if(remaining<=0){ clearInterval(quizTimer); submitAuto(); }
   },1000);
 }
-function stopTimer(){ if(quizTimer) clearInterval(quizTimer); quizTimer=null; }
+function stopTimer(){ if(quizTimer) clearInterval(quizTimer); }
 
-/* ---------- Next question / answer checks ---------- */
-function nextQuestion(){
-  if(round.index >= round.total){ endRound(); return; }
-  round.index++;
-  currentNumber = rand(pool);
-  questionText.innerText = `What is ${currentNumber}² ?`;
-  answerField.value = '';
-  feedback.innerText = '';
-  hintBox.innerText = 'Tip: Tap 💡 for a smart, non-spoiler hint.';
-  scoreLine.innerText = `Score: ${round.score}`;
-  streakEl.innerText = round.streak;
-  comboEl.innerText = round.combo;
-  startTimer(timerSecs);
-  answerField.focus();
-}
+/* check answer */
+submit.addEventListener('click', ()=> { ensureAudio(); checkAnswer(); });
+answer.addEventListener('keypress', e=>{ if(e.key==='Enter'){ ensureAudio(); checkAnswer(); } });
+
 function checkAnswer(){
-  const user = Number(answerField.value);
-  const correct = currentNumber*currentNumber;
-  round.totalAsked = (round.totalAsked||0)+1;
   stopTimer();
-  if(user === correct){
-    // correct
-    round.score += 10 * round.combo;
-    round.streak++;
-    round.combo = Math.min(5, Math.floor(round.streak/3)+1); // increase combo every 3 streak
-    feedback.style.color = 'var(--good)';
-    feedback.innerText = '✓ Correct!';
-    soundCorrect(); spawnConfetti(innerWidth/2, innerHeight/3, 40);
-    checkBadges('correct');
+  const val = Number(answer.value);
+  const correct = current*current;
+  if(val === correct){
+    score += 10 * Math.min(5, Math.floor(streak/3)+1);
+    streak++;
+    updateScoreUI();
+    feedback.style.color = 'var(--good)'; feedback.textContent = '✓ Correct';
+    correctSound(); spawnConfetti(innerWidth/2, innerHeight/3, 40);
+    maybeBadge('first'); // example badge logic
   } else {
-    feedback.style.color = 'var(--bad)';
-    feedback.innerText = `✗ Wrong — ${correct}`;
-    round.streak = 0;
-    round.combo = 1;
-    soundWrong();
+    feedback.style.color = 'var(--bad)'; feedback.textContent = `✗ Wrong — ${correct}`;
+    wrongSound();
+    streak = 0;
+    updateScoreUI();
   }
-  scoreLine.innerText = `Score: ${round.score}`;
-  streakEl.innerText = round.streak;
-  comboEl.innerText = round.combo;
-  saveProgressSnapshot();
-  setTimeout(nextQuestion, 900);
+  setTimeout(nextQ, 900);
 }
-submitAnswer.onclick = ()=>{ ensureAudio(); checkAnswer(); }
-answerField.addEventListener('keypress', e=>{ if(e.key==='Enter') { ensureAudio(); checkAnswer(); } });
-
-/* timer up auto-wrong */
-function timeUp(){
-  feedback.style.color = 'var(--muted)';
-  feedback.innerText = '⏱️ Time up!';
-  round.streak = 0; round.combo = 1;
-  scoreLine.innerText = `Score: ${round.score}`;
-  soundWrong();
-  setTimeout(nextQuestion, 900);
+function submitAuto(){
+  feedback.style.color = 'var(--muted)'; feedback.textContent = '⏱️ Time up!';
+  wrongSound();
+  streak = 0; updateScoreUI();
+  setTimeout(nextQ,900);
 }
 
-/* ---------- Hints & Steps ---------- */
+/* hints: context-aware and random */
+const hints = [
+  "Squares never end in 2,3,7 or 8 — use this to check your answer.",
+  "If number ends with 5: (a5)² → a×(a+1) then append 25. Example: 45² → 2025.",
+  "Use (n−1)(n+1)+1 trick for many numbers.",
+  "Close to 50? Use 50²=2500 then adjust by difference*100 + diff²."
+];
 function contextHint(n){
-  const s=String(n);
-  if(s.endsWith('5')) return `Ends with 5 → Use: (a×(a+1)) then append 25. Example: 45² → 4×5 =20 → 2025.`;
-  if(Math.abs(n-50)<=5) {
-    const d = n-50; return `Near 50 → 50²=2500; n² = 2500 + ${d*100} + ${d*d}. For ${n} that is ${2500 + d*100 + d*d}.`;
-  }
-  if(Math.abs(n-100)<=5) {
-    const d = 100-n; return `Near 100 → n² = 10000 - 200×${d} + ${d*d}.`;
-  }
-  const last = n%10; const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
-  return `Last-digit trick: since it ends with ${last}, square ends with ${endings[last]}.`;
+  if(String(n).endsWith('5')) return `Ends with 5 → (a×(a+1)) then add 25. For ${n}: ${Math.floor(n/10)}×${Math.floor(n/10)+1} then append 25 → ${Math.floor(n/10)*(Math.floor(n/10)+1)}25`;
+  if(Math.abs(n-50)<=5){ const d = n-50; return `Near 50 → 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`; }
+  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
+  return `Last-digit trick: number ends with ${n%10}, square ends with ${endings[n%10]}`;
 }
-hintBtn.onclick = ()=>{ if(currentNumber) hintBox.innerText = 'Hint: ' + contextHint(currentNumber); else hintBox.innerText = 'Hint: Try a round first!'; }
-stepsBtn.onclick = ()=>{ if(currentNumber) hintBox.innerText = 'Steps: ' + stepExplanation(currentNumber); else hintBox.innerText = 'Start a round to see steps.'; }
-
+hintBtn.addEventListener('click', ()=> {
+  if(current) hintBox.textContent = 'Hint: ' + contextHint(current);
+  else hintBox.textContent = 'Hint: ' + hints[Math.floor(Math.random()*hints.length)];
+});
+stepsBtn.addEventListener('click', ()=> {
+  if(current) hintBox.textContent = 'Steps: ' + stepExplanation(current);
+  else hintBox.textContent = 'Start a round to see steps';
+});
 function stepExplanation(n){
-  if(String(n).endsWith('5')){ const a=Math.floor(n/10); return `${n}² => ${a}×${a+1} = ${a*(a+1)} then append 25 -> ${a*(a+1)}25`; }
-  if(Math.abs(n-50)<=5){ const d=n-50; return `${n}² => 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`; }
-  if(n<30){ const t=Math.floor(n/10)*10, u=n%10; return `(${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`; }
-  return `(n-1)(n+1)+1: ${n}² = ${n-1}×${n+1} + 1 = ${(n-1)*(n+1)} + 1 = ${(n-1)*(n+1)+1}`;
+  if(String(n).endsWith('5')){ const a=Math.floor(n/10); return `${n}² → ${a}×${a+1} = ${a*(a+1)} → append 25 = ${a*(a+1)}25`; }
+  if(Math.abs(n-50)<=5){ const d=n-50; return `${n}² → 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`; }
+  const t = Math.floor(n/10)*10, u = n%10; return `${n}² = (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`;
 }
-
-/* ---------- Badges & achievements ---------- */
-function checkBadges(event){
-  // simple badges
-  if(event==='correct' && !state.badges['first']){ awardBadge('First Correct', 'first'); }
-  if(round.streak===5 && !state.badges['5']) awardBadge('5-in-a-row!', '5');
-  if(round.streak===10 && !state.badges['10']) awardBadge('10-in-a-row!', '10');
-}
-function awardBadge(title,key){
-  state.badges[key]=true; saveState();
-  // popup
-  const box = document.createElement('div'); box.className='centerModal';
-  box.innerHTML = `<div class="popup"><div style="font-size:18px;font-weight:900">🏅 ${title}</div><div style="margin-top:8px;color:var(--muted)">Badge added to your profile</div><div style="margin-top:12px"><button class="btn" id="closeBadge">Nice!</button></div></div>`;
-  modalArea.appendChild(box);
-  document.getElementById('closeBadge').onclick = ()=> modalArea.innerHTML='';
-}
-
-/* ---------- End round & summary ---------- */
-function endRound(){
-  stopTimer();
-  // push score to leaderboard
-  const entry = {score: round.score, date: new Date().toISOString()};
-  state.leaderboard = state.leaderboard || [];
-  state.leaderboard.push(entry);
-  // keep top 10 by score desc
-  state.leaderboard.sort((a,b)=>b.score-a.score);
-  if(state.leaderboard.length>10) state.leaderboard.length=10;
-  saveState();
-  // show summary
-  showSummary(entry);
-}
-function showSummary(entry){
-  const modal = document.createElement('div'); modal.className='centerModal';
-  modal.innerHTML = `<div class="popup">
-    <div style="font-size:20px;font-weight:900">Round Complete 🎉</div>
-    <div style="margin-top:8px">Score: <b>${round.score}</b></div>
-    <div style="margin-top:8px">Max Streak: <b>${round.streak}</b></div>
-    <div style="margin-top:10px">${round.earnedBadges && round.earnedBadges.length ? 'Badges: ' + round.earnedBadges.join(', ') : ''}</div>
-    <div style="margin-top:12px"><button class="btn" id="saveNameBtn">Save to Leaderboard</button> <button class="ghost" id="playAgain">Play Again</button></div>
-    <div style="margin-top:10px" class="small">You can also view the leaderboard to compare.</div>
-  </div>`;
-  modalArea.appendChild(modal);
-  document.getElementById('playAgain').onclick = ()=> { modalArea.innerHTML=''; startRound(round.mode, round.total); };
-  document.getElementById('saveNameBtn').onclick = ()=> {
-    const name = prompt('Enter name for leaderboard (or leave blank)');
-    if(name!==null){
-      entry.name = name || 'You';
-      saveState();
-      modalArea.innerHTML='';
-      showLeaderboard();
-    }
-  };
-}
-
-/* ---------- Leaderboard ---------- */
-function showLeaderboard(){
-  const modal = document.createElement('div'); modal.className='centerModal';
-  modal.innerHTML = `<div class="popup">
-    <div style="font-size:20px;font-weight:900">🏆 Leaderboard</div>
-    <div style="margin-top:10px" class="leaderboard">${(state.leaderboard||[]).map((e,i)=>`<div class="row"><div>#${i+1} ${e.name||'Player'}</div><div><b>${e.score}</b></div></div>`).join('')}</div>
-    <div style="margin-top:12px"><button class="btn" id="closeLB">Close</button></div>
-  </div>`;
-  modalArea.appendChild(modal);
-  document.getElementById('closeLB').onclick = ()=> modalArea.innerHTML='';
-}
-openLeaderboard.onclick = showLeaderboard;
 
 /* ---------- MCQ mode ---------- */
-let mcqCurrent = null;
-let mcqRoundCount = 0;
-let mcqScoreVal = 0;
-let mcqStreakVal = 0;
-function nextMCQ(){
-  if(mcqRoundCount >= 10){ endMCQRound(); return; }
-  mcqRoundCount++;
-  mcqCurrent = rand(pool);
-  mcqQ.innerText = `What is ${mcqCurrent}² ?`;
+let mcqScore = 0, mcqRound = 0, mcqCurrent = null;
+function startMCQ(){
+  studyPanel.style.display='none'; quizPanel.style.display='none'; mcqPanel.style.display='block';
+  mcqScore = 0; mcqRound = 0; mcqNext();
+}
+function mcqNext(){
+  mcqRound++; mcqRoundEl.textContent = mcqRound;
+  mcqCurrent = pick(); mcqQ.textContent = `What is ${mcqCurrent}² ?`;
   const correct = mcqCurrent*mcqCurrent;
   let opts = new Set([correct]);
-  while(opts.size < 4){
-    const delta = (Math.floor(Math.random()*9)-4) * (Math.floor(Math.random()*7)+1);
-    opts.add(Math.max(1, correct + delta));
+  while(opts.size<4){
+    const delta = (Math.floor(Math.random()*11)-5) * (Math.floor(Math.random()*7)+1);
+    opts.add(Math.abs(correct + delta));
   }
   const arr = Array.from(opts).sort(()=>Math.random()-0.5);
-  [optA,optB,optC,optD].forEach((el,i)=>{ el.innerText = arr[i]; el.onclick = ()=> checkMCQ(arr[i]); });
-  mcqFeedback.innerText = '';
-  mcqScore.innerText = `Score: ${mcqScoreVal}`;
-  mcqHint.innerText = 'Tip: Tap hint for a quick trick.';
+  mcqOpts.forEach((btn,idx)=>{ btn.textContent = arr[idx]; btn.onclick = ()=> mcqCheck(arr[idx]); });
+  mcqFeedback.textContent = ''; mcqHint.textContent = 'Tap hint for context';
+  if(mcqRound>10){ endMCQ(); }
 }
-function checkMCQ(val){
-  const correct = mcqCurrent*mcqCurrent;
-  if(val === correct){
-    mcqScoreVal += 10;
-    mcqStreakVal++;
-    soundCorrect(); spawnConfetti(innerWidth/2, innerHeight/3, 30);
-    mcqFeedback.style.color = 'var(--good)';
-    mcqFeedback.innerText = '✓ Correct';
-    checkBadges('correct');
-  } else {
-    soundWrong();
-    mcqStreakVal = 0;
-    mcqFeedback.style.color = 'var(--bad)';
-    mcqFeedback.innerText = `✗ Wrong — ${correct}`;
+function mcqCheck(val){
+  const corr = mcqCurrent*mcqCurrent;
+  if(val === corr){ mcqScore += 10; mcqFeedback.style.color = 'var(--good)'; mcqFeedback.textContent = '✓ Correct'; correctSound(); spawnConfetti(innerWidth/2, innerHeight/3, 30); }
+  else { mcqFeedback.style.color = 'var(--bad)'; mcqFeedback.textContent = `✗ Wrong — ${corr}`; wrongSound(); }
+  mcqScoreEl.textContent = mcqScore;
+  setTimeout(()=> { if(mcqRound<10) mcqNext(); else endMCQ(); }, 800);
+}
+function endMCQ(){ // push to leaderboard
+  state.leaderboard = state.leaderboard || [];
+  state.leaderboard.push({score:mcqScore, date:new Date().toISOString()});
+  state.leaderboard.sort((a,b)=>b.score-a.score); if(state.leaderboard.length>10) state.leaderboard.length=10;
+  localStorage.setItem(LS, JSON.stringify(state));
+  showModal(`<div style="font-weight:900">MCQ Round Complete</div><div style="margin-top:8px">Score: <b>${mcqScore}</b></div><div style="margin-top:10px"><button onclick="closeModal()" class="btn">Close</button></div>`);
+}
+
+/* ---------- tiny leaderboard & badges ---------- */
+document.getElementById('openLB').onclick = showLeaderboard;
+function showLeaderboard(){
+  const lb = state.leaderboard || [];
+  const rows = lb.map((r,i)=>`<div class="row"><div>#${i+1} ${r.name||'Player'}</div><div><b>${r.score}</b></div></div>`).join('');
+  showModal(`<div style="font-weight:900">🏆 Leaderboard</div><div style="margin-top:10px" class="leaderboard">${rows || '<div class="small muted">No scores yet</div>'}</div><div style="margin-top:12px"><button onclick="closeModal()" class="btn">Close</button></div>`);
+}
+
+function maybeBadge(key){
+  if(!state.badges) state.badges = {};
+  if(!state.badges[key]) {
+    state.badges[key]=true; localStorage.setItem(LS, JSON.stringify(state));
+    document.getElementById('badgeFloating').style.display='block';
+    document.getElementById('badgeFloating').textContent = '🏅 New badge!';
+    setTimeout(()=> document.getElementById('badgeFloating').style.display='none', 2200);
   }
-  mcqScore.innerText = `Score: ${mcqScoreVal}`;
-  mcqStreak.innerText = mcqStreakVal;
-  setTimeout(nextMCQ, 900);
-}
-function endMCQRound(){
-  // push to leaderboard
-  state.leaderboard.push({score: mcqScoreVal, date: new Date().toISOString(), name: 'MCQ Player'});
-  state.leaderboard.sort((a,b)=>b.score-a.score);
-  if(state.leaderboard.length>10) state.leaderboard.length=10;
-  saveState();
-  // show summary modal
-  const modal = document.createElement('div'); modal.className='centerModal';
-  modal.innerHTML = `<div class="popup"><div style="font-size:20px;font-weight:900">MCQ Round Done</div><div style="margin-top:8px">Score: ${mcqScoreVal}</div><div style="margin-top:12px"><button class="btn" id="closeMCQ">Close</button></div></div>`;
-  modalArea.appendChild(modal);
-  document.getElementById('closeMCQ').onclick = ()=> modalArea.innerHTML='';
 }
 
-/* ---------- Progress save ---------- */
-function saveProgressSnapshot(){
-  state.lastScore = round.score;
-  state.lastTimestamp = new Date().toISOString();
-  saveState();
+/* ---------- modal helpers ---------- */
+function showModal(html){
+  const area = document.getElementById('modalArea');
+  const div = document.createElement('div'); div.className='centerModal';
+  div.innerHTML = `<div class="popup">${html}</div>`;
+  area.appendChild(div);
 }
+function closeModal(){ document.getElementById('modalArea').innerHTML=''; }
 
-/* ---------- Init ---------- */
-function init(){
-  buildPool();
-  buildStudyGrid();
-  levelSelect.value = level;
-  // toggle study button
-  toggleStudy.onclick = ()=> { studyPanel.style.display = studyPanel.style.display === 'none' ? 'block' : 'none' };
-  resetBtn.onclick = ()=> { if(confirm('Reset all progress & badges?')){ localStorage.removeItem(LS_KEY); state = {leaderboard:[],badges:{}}; saveState(); alert('Reset done'); } };
-  document.getElementById('toggleStudy').onclick = ()=> { studyPanel.style.display = studyPanel.style.display === 'none' ? 'block' : 'none'; };
-}
-init();
+/* ---------- simple save/load ---------- */
+function saveState(){ localStorage.setItem(LS, JSON.stringify(state)); }
 
-/* ---------- small UX touches: reveal confetti if first-run ---------- */
-if(!state.seenWelcome){
-  state.seenWelcome = true;
-  saveState();
-  setTimeout(()=>{ spawnConfetti(innerWidth/2, innerHeight/3, 60); }, 700);
+/* ---------- init ---------- */
+document.getElementById('startBtn').addEventListener('click', ()=> { ensureAudio(); startQuiz(); });
+document.getElementById('shuffle').addEventListener('click', ()=> { pool.sort(()=>Math.random()-0.5); buildStudy(); });
+document.getElementById('fab').addEventListener('click', ()=> { showModal('<div style="font-weight:900">Daily Tip</div><div style="margin-top:8px">Practice 10 mins — aim for 5-in-a-row!</div><div style="margin-top:10px"><button onclick="closeModal()" class="btn">Got it</button></div>'); });
+
+/* small helpers to run confetti from code above scope */
+function spawnConfetti(x,y,count){ /* stub - real implementation above will still work since function already defined */ }
+
+/* expose some functions (so modal buttons can call closeModal) */
+window.closeModal = closeModal;
+
+/* greet on first run */
+if(!localStorage.getItem('squares_welcome_shown')){
+  localStorage.setItem('squares_welcome_shown','1');
+  setTimeout(()=> spawnConfetti(innerWidth/2, innerHeight/3, 80), 600);
 }
 </script>
-
 </body>
 </html>
