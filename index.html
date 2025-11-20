@@ -1,209 +1,509 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fun Squares Trainer 🎉</title>
-
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Alien Rescue — Help Fizzoo! 👾🚀</title>
 <style>
-  body {
-    margin: 0;
-    font-family: "Comic Sans MS", sans-serif;
-    background: #fffbeb;
-    text-align: center;
-    padding: 20px;
+  :root{
+    --bg:#041628; --panel:#072033; --accent:#7c3aed; --accent2:#06b6d4;
+    --good:#28c76f; --bad:#ff6b6b; --muted:#9fb2c6;
+    --card-radius:14px;
+    --big:18px;
   }
-
-  h1 {
-    font-size: 28px;
-    color: #ef4444;
-  }
-
-  .btn {
-    background: #f97316;
-    color: white;
-    padding: 14px 20px;
-    font-size: 18px;
-    border-radius: 12px;
-    border: none;
-    margin: 8px;
-    width: 80%;
-    max-width: 260px;
-    cursor: pointer;
-  }
-
-  .btn:hover {
-    background: #ea580c;
-  }
-
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .card {
-    background: #ffffff;
-    padding: 18px;
-    border-radius: 15px;
-    border: 3px solid #fde047;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    font-size: 20px;
-    font-weight: bold;
-  }
-
-  .quiz-box {
-    margin-top: 20px;
-    font-size: 22px;
-  }
-
-  input {
-    margin-top: 10px;
-    padding: 12px;
-    font-size: 18px;
-    width: 200px;
-    border-radius: 10px;
-    border: 2px solid #fbbf24;
-    text-align: center;
-  }
-
-  .feedback {
-    margin-top: 15px;
-    font-size: 24px;
-  }
-
-  /* Confetti */
-  #confetti {
-    position: fixed;
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-  }
-
-  .hint-box {
-    margin-top: 12px;
-    font-size: 18px;
-    color: #2563eb;
-  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#001021,#041628 60%); color:#e6f0fb}
+  main{max-width:960px;margin:0 auto;padding:14px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{font-size:20px;margin:0;color:var(--accent2);text-shadow:0 4px 18px rgba(6,182,212,0.08)}
+  .sub{color:var(--muted);font-size:13px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:var(--card-radius); padding:12px; margin-top:12px; box-shadow:0 10px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.02)}
+  .row{display:flex;gap:8px;align-items:center}
+  button.btn{background:linear-gradient(90deg,var(--accent),#5b21b6); color:white;border:0;padding:12px 14px;border-radius:12px;font-weight:800;font-size:16px;box-shadow:0 8px 26px rgba(99,102,241,0.12);cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:10px;border-radius:10px}
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .bigText{font-size:22px;font-weight:800}
+  .hint{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-top:10px;color:var(--muted)}
+  input[type=number]{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--accent2);font-weight:800;width:160px;text-align:center;font-size:18px}
+  .feedback{min-height:36px;font-weight:900;margin-top:8px}
+  /* progress / mission bar */
+  .missionBar{height:14px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;margin-top:10px}
+  .missionInner{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0%;transition:width 400ms}
+  /* ship area */
+  .shipArea{height:180px;display:flex;align-items:center;justify-content:center;position:relative}
+  .ship{font-size:48px;filter:drop-shadow(0 12px 20px rgba(0,0,0,0.6))}
+  .partBadge{position:absolute; font-size:28px; opacity:0.0; transition:all 600ms; pointer-events:none}
+  .badge-engine{left:20%;top:18%}
+  .badge-wings{left:78%;top:22%}
+  .badge-nav{left:50%;top:6%}
+  .badge-drive{left:50%;bottom:6%}
+  /* stickers area */
+  .stickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .sticker{background:linear-gradient(90deg,#ffd8a8,#ffd1f3);color:#1f2937;padding:8px 10px;border-radius:10px;font-weight:800}
+  /* small responsive */
+  @media(min-width:700px){ .ship{font-size:72px} input[type=number]{width:220px} .bigText{font-size:26px} }
+  /* confetti canvas */
+  #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+  /* playful alien bubble */
+  .alienBubble{background:linear-gradient(180deg,#07324a,#072439);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 18px rgba(2,6,23,0.6);color:var(--muted);font-weight:700}
+  footer{color:var(--muted);font-size:13px;margin-top:14px;text-align:center}
 </style>
 </head>
-
 <body>
-
-<h1>🎉 Fun Squares Trainer 🎉</h1>
-
-<button class="btn" onclick="showLearn()">📘 Learn Squares</button>
-<button class="btn" onclick="startGame()">🎮 Play Game</button>
-
-<div id="learnSection" style="display:none;">
-  <h2>📘 Learn All Squares</h2>
-  <div class="card-grid" id="cardGrid"></div>
-</div>
-
-<div id="gameSection" style="display:none;">
-  <h2>🎮 Game Time!</h2>
-  <div class="quiz-box" id="questionBox"></div>
-  <input type="number" id="answerInput" placeholder="Your answer">
-  <br>
-  <button class="btn" onclick="checkKidAnswer()">Submit</button>
-  <div class="feedback" id="feedback"></div>
-  <div class="hint-box" id="hintBox">Hint will appear here...</div>
-  <button class="btn" onclick="showHint()">💡 Hint</button>
-</div>
-
 <canvas id="confetti"></canvas>
+<main>
+  <header>
+    <div>
+      <h1>Alien Rescue — Help Fizzoo! 👾</h1>
+      <div class="sub">Solve squares to repair the spaceship & send Fizzoo home 🌌</div>
+    </div>
+    <div class="row">
+      <button id="resetBtn" class="ghost">Reset</button>
+    </div>
+  </header>
+
+  <!-- Story Intro -->
+  <section id="intro" class="panel center">
+    <div class="bigText">🚨 Fizzoo's spaceship broke! 🚨</div>
+    <p class="sub" style="max-width:520px">Fizzoo the friendly alien needs your help. Solve number puzzles (squares) to fix 4 ship parts: <b>Engine</b>, <b>Solar Wings</b>, <b>Navigation</b>, and <b>Hyperdrive</b>. Each correct answer gives tools to repair a part.</p>
+    <div style="margin-top:12px" class="row">
+      <button id="startMission" class="btn">Start Mission</button>
+      <button id="learnBtn" class="ghost">Learn Squares</button>
+    </div>
+  </section>
+
+  <!-- Learn (cheat-sheet) -->
+  <section id="learn" class="panel" style="display:none">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div class="bigText">Space Academy — Squares 2–50</div>
+      <button id="backFromLearn" class="ghost">Back</button>
+    </div>
+    <div style="margin-top:8px;color:var(--muted)">Tap any card to reveal the square</div>
+    <div id="learnGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px"></div>
+  </section>
+
+  <!-- Mission -->
+  <section id="mission" class="panel" style="display:none">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div>
+        <div class="bigText" id="stageTitle">Stage 1 — Repair Engine</div>
+        <div class="sub" id="stageSub">Solve 5 puzzles to fix the Engine</div>
+      </div>
+      <div style="text-align:right">
+        <div class="alienBubble" id="alienBubble">👾 Hello! I'm Fizzoo — I will give tips!</div>
+      </div>
+    </div>
+
+    <!-- ship visual -->
+    <div class="shipArea">
+      <div class="ship">🛸</div>
+      <div class="partBadge badge-engine" id="badgeEngine">🔧</div>
+      <div class="partBadge badge-wings" id="badgeWings">🪽</div>
+      <div class="partBadge badge-nav" id="badgeNav">🧭</div>
+      <div class="partBadge badge-drive" id="badgeDrive">⚡</div>
+    </div>
+
+    <!-- Mission progress -->
+    <div class="missionBar"><div class="missionInner" id="missionInner"></div></div>
+
+    <!-- Puzzle area -->
+    <div style="margin-top:12px" class="center">
+      <div class="bigText" id="questionText">What is 2² ?</div>
+      <div style="margin-top:10px">
+        <input id="answerBox" type="number" inputmode="numeric" placeholder="Your answer">
+      </div>
+      <div style="margin-top:10px" class="row">
+        <button id="submitBtn" class="btn">Submit</button>
+        <button id="hintBtn" class="ghost">Hint</button>
+        <button id="stepsBtn" class="ghost">Show Steps</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="hint" id="hintText">Fizzoo: Tap Hint for a friendly clue.</div>
+
+      <div style="margin-top:10px" class="stickers" id="stickers"></div>
+    </div>
+  </section>
+
+  <footer>Tip: Hints are friendly clues — try thinking of tens & ones or endings like 25 for numbers ending with 5!</footer>
+</main>
 
 <script>
-/* -------- Learn Mode -------- */
-function showLearn() {
-  document.getElementById("learnSection").style.display = "block";
-  document.getElementById("gameSection").style.display = "none";
+/* ---------- Data & Persistent state ---------- */
+const STAGES = [
+  { id: 'engine', title:'Repair Engine', need: 5 },
+  { id: 'wings', title:'Fix Solar Wings', need: 5 },
+  { id: 'nav', title:'Restore Navigation', need: 5 },
+  { id: 'drive', title:'Start Hyperdrive', need: 5 }
+];
+const NUM_MIN = 2, NUM_MAX = 50;
+const LS_KEY = 'alien_rescue_progress_v1';
 
-  let grid = document.getElementById("cardGrid");
-  grid.innerHTML = "";
+let state = loadState(); // will initialize if empty
+function defaultState(){
+  return {
+    stageIndex: 0,
+    progressInStage: 0,
+    repaired: { engine:false, wings:false, nav:false, drive:false },
+    stickers: [],
+    totalCorrect: 0
+  };
+}
+if(!state) { state = defaultState(); saveState(); }
 
-  for (let i = 2; i <= 20; i++) {
-    let card = document.createElement("div");
-    card.className = "card";
-    card.innerText = `${i}² = ${i*i}`;
-    grid.appendChild(card);
+/* ---------- Simple DOM refs ---------- */
+const intro = document.getElementById('intro');
+const mission = document.getElementById('mission');
+const learn = document.getElementById('learn');
+const startBtn = document.getElementById('startMission');
+const learnBtn = document.getElementById('learnBtn');
+const backFromLearn = document.getElementById('backFromLearn');
+const stageTitle = document.getElementById('stageTitle');
+const stageSub = document.getElementById('stageSub');
+const questionText = document.getElementById('questionText');
+const answerBox = document.getElementById('answerBox');
+const submitBtn = document.getElementById('submitBtn');
+const hintBtn = document.getElementById('hintBtn');
+const stepsBtn = document.getElementById('stepsBtn');
+const feedback = document.getElementById('feedback');
+const missionInner = document.getElementById('missionInner');
+const hintText = document.getElementById('hintText');
+const stickerArea = document.getElementById('stickers');
+const alienBubble = document.getElementById('alienBubble');
+const resetBtn = document.getElementById('resetBtn');
+const badgeEngine = document.getElementById('badgeEngine');
+const badgeWings = document.getElementById('badgeWings');
+const badgeNav = document.getElementById('badgeNav');
+const badgeDrive = document.getElementById('badgeDrive');
+
+/* confetti canvas */
+const confettiCanvas = document.getElementById('confetti');
+const confettiCtx = confettiCanvas.getContext('2d');
+function resizeCanvas(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+/* ---------- Build Learn Grid ---------- */
+function buildLearnGrid(){
+  const grid = document.getElementById('learnGrid');
+  grid.innerHTML = '';
+  for(let n=NUM_MIN; n<=NUM_MAX; n++){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `<div style="font-size:18px;font-weight:900">${n}</div><div style="margin-top:6px" data-hidden>Tap to reveal</div>`;
+    el.addEventListener('click', ()=>{
+      const d = el.querySelector('[data-hidden]');
+      if(d) d.innerText = (n*n);
+    });
+    grid.appendChild(el);
   }
 }
+buildLearnGrid();
 
-/* -------- Game Mode -------- */
-let currentNum = 0;
-
-function startGame() {
-  document.getElementById("gameSection").style.display = "block";
-  document.getElementById("learnSection").style.display = "none";
-  nextQuestion();
+/* ---------- Stage logic ---------- */
+let currentNumber = null;
+function enterMission(){
+  intro.style.display = 'none';
+  learn.style.display = 'none';
+  mission.style.display = 'block';
+  updateStageUI();
+  generateQuestion();
+  renderBadges();
+  renderStickers();
+}
+function updateStageUI(){
+  const s = STAGES[state.stageIndex];
+  stageTitle.innerText = `Stage ${state.stageIndex+1} — ${s.title}`;
+  stageSub.innerText = `Solve ${s.need} puzzles to complete this part`;
+  const pct = (state.progressInStage / s.need) * 100;
+  missionInner.style.width = pct + '%';
+  alienBubble.innerText = `👾 Fizzoo: ${friendlyMessage()}`;
 }
 
-function nextQuestion() {
-  currentNum = Math.floor(Math.random() * 19) + 2; // 2–20
-  document.getElementById("questionBox").innerHTML = `What is <b>${currentNum}²</b> ?`;
-  document.getElementById("feedback").innerHTML = "";
-  document.getElementById("hintBox").innerHTML = "Hint will appear here...";
-  document.getElementById("answerInput").value = "";
+/* generate a random number between 2 & 50 that hasn't appeared too often */
+function pickNumber(){
+  return Math.floor(Math.random()*(NUM_MAX-NUM_MIN+1)) + NUM_MIN;
 }
 
-/* Hints for kids */
-function showHint() {
-  let last = currentNum % 10;
-  let hint = "";
-
-  if (last === 5) hint = "Numbers ending in 5 always end with 25!";
-  else if (last === 4) hint = "If ends with 4 → square ends with 6!";
-  else if (last === 6) hint = "If ends with 6 → square ends with 6!";
-  else if (currentNum < 10) hint = "Try multiplying small numbers in your head!";
-  else hint = "Break it: " + currentNum + " = " + Math.floor(currentNum/10) + " + " + (currentNum%10);
-
-  document.getElementById("hintBox").innerHTML = "💡 " + hint;
+/* Show question */
+function generateQuestion(){
+  currentNumber = pickNumber();
+  questionText.innerText = `What is ${currentNumber} × ${currentNumber} ?`;
+  answerBox.value = '';
+  feedback.innerText = '';
+  hintText.innerText = 'Fizzoo: Tap Hint for a gentle clue.';
+  // small friendly auto-hint preview (non-spoiler)
+  setTimeout(()=> hintText.innerText = `Fizzoo: Tip — look at the last digit or split tens & ones!`, 1200);
 }
 
-function checkKidAnswer() {
-  let ans = Number(document.getElementById("answerInput").value);
-  let correct = currentNum * currentNum;
-  let fb = document.getElementById("feedback");
+/* ---------- Hints & Steps (context-aware) ---------- */
+function contextHint(n){
+  const last = n % 10;
+  if(last === 5) return `Ends with 5 → square ends with 25. Multiply the left digits then add 25.`;
+  if(Math.abs(n-50) <= 5){
+    const d = n-50;
+    return `Near 50 → 50²=2500. Then: n² = 2500 + ${d*100} + ${d*d}.`;
+  }
+  if(n < 30) return `Split: (${Math.floor(n/10)*10} + ${n%10})² = tens² + 2×tens×ones + ones².`;
+  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
+  return `Last-digit trick: If number ends with ${last}, its square ends with ${endings[last]}.`;
+}
+function showHint(){
+  hintText.innerText = `👽 Alien hint: ` + contextHint(currentNumber);
+}
+function showSteps(){
+  // more detailed but short
+  let n = currentNumber;
+  if(String(n).endsWith('5')){
+    const a = Math.floor(n/10);
+    hintText.innerText = `Steps: ${n}² → ${a}×${a+1} = ${a*(a+1)} then append 25 → ${a*(a+1)}25`;
+    return;
+  }
+  if(Math.abs(n-50) <= 5){
+    const d = n-50;
+    hintText.innerText = `Steps: ${n}² = 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`;
+    return;
+  }
+  if(n<30){
+    const t = Math.floor(n/10)*10, u = n%10;
+    hintText.innerText = `Steps: (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`;
+    return;
+  }
+  hintText.innerText = `Steps: Use (n-1)(n+1)+1 → ${n}² = ${(n-1)*(n+1)} + 1 = ${(n-1)*(n+1) + 1}`;
+}
 
-  if (ans === correct) {
-    fb.style.color = "green";
-    fb.innerHTML = "🌟 Correct! Great job! 🌟";
-    dropConfetti();
-    setTimeout(nextQuestion, 1200);
+/* ---------- Answer checking & rewards ---------- */
+submitBtn.addEventListener('click', ()=> { checkAnswer(false); });
+answerBox.addEventListener('keypress', e => { if(e.key==='Enter') checkAnswer(false); });
+hintBtn.addEventListener('click', showHint);
+stepsBtn.addEventListener('click', showSteps);
+
+function checkAnswer(auto=false){
+  const val = Number(answerBox.value);
+  const correct = currentNumber * currentNumber;
+  if(!auto && val === correct){
+    onCorrect();
   } else {
-    fb.style.color = "red";
-    fb.innerHTML = "😢 Oops! Try again!";
+    onWrong(correct);
   }
 }
 
-/* -------- Confetti -------- */
-let confettiCanvas = document.getElementById("confetti");
-let ctx = confettiCanvas.getContext("2d");
-
-function dropConfetti() {
-  confettiCanvas.width = window.innerWidth;
-  confettiCanvas.height = window.innerHeight;
-
-  for (let i = 0; i < 150; i++) {
-    drawConfetti();
+function onCorrect(){
+  feedback.style.color = 'var(--good)';
+  feedback.innerText = randomPraise();
+  // progress
+  state.progressInStage++;
+  state.totalCorrect = (state.totalCorrect || 0) + 1;
+  // sticker reward
+  const s = randomSticker();
+  state.stickers.push(s);
+  saveState();
+  renderStickers();
+  // small confetti + sound + animate badge
+  spawnConfetti();
+  playCorrectSound();
+  if(state.progressInStage >= STAGES[state.stageIndex].need){
+    // mark repaired
+    const id = STAGES[state.stageIndex].id;
+    state.repaired[id] = true;
+    state.stageIndex = Math.min(state.stageIndex + 1, STAGES.length - 1);
+    state.progressInStage = 0;
+    // animate badge reveal
+    revealBadge(id);
+    saveState();
+    // slight delay to show success then advance or finish
+    setTimeout(()=> {
+      if(allRepaired()){ missionComplete(); }
+      else { updateStageUI(); generateQuestion(); }
+    }, 1100);
+  } else {
+    saveState();
+    updateStageUI();
+    setTimeout(()=> generateQuestion(), 900);
   }
-
-  setTimeout(() => ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height), 1000);
 }
 
-function drawConfetti() {
-  let x = Math.random() * confettiCanvas.width;
-  let y = Math.random() * confettiCanvas.height;
-  let size = Math.random() * 6 + 3;
-
-  ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-  ctx.fillRect(x, y, size, size);
+function onWrong(correct){
+  feedback.style.color = 'var(--bad)';
+  feedback.innerText = `Oops — the correct answer is ${correct}. Try next puzzle!`;
+  playWrongSound();
+  // small shake or hint
+  hintText.innerText = 'Fizzoo: Don’t worry — try using the steps button!';
+  // still proceed to next puzzle to keep flow
+  state.totalCorrect = state.totalCorrect || 0;
+  setTimeout(()=> { updateStageUI(); generateQuestion(); }, 1200);
 }
+
+/* ---------- Stage completion & final ---------- */
+function allRepaired(){
+  return Object.values(state.repaired).every(v=>v===true);
+}
+
+function revealBadge(partId){
+  if(partId === 'engine'){ badgeEngine.style.opacity = 1; badgeEngine.style.transform = 'scale(1.2)'; setTimeout(()=> badgeEngine.style.transform='scale(1)',300); }
+  if(partId === 'wings'){ badgeWings.style.opacity = 1; badgeWings.style.transform = 'scale(1.2)'; setTimeout(()=> badgeWings.style.transform='scale(1)',300); }
+  if(partId === 'nav'){ badgeNav.style.opacity = 1; badgeNav.style.transform = 'scale(1.2)'; setTimeout(()=> badgeNav.style.transform='scale(1)',300); }
+  if(partId === 'drive'){ badgeDrive.style.opacity = 1; badgeDrive.style.transform = 'scale(1.2)'; setTimeout(()=> badgeDrive.style.transform='scale(1)',300); }
+}
+
+/* mission complete */
+function missionComplete(){
+  stageTitle.innerText = 'Mission Complete — Launch!';
+  stageSub.innerText = 'You repaired all parts. Fizzoo is going home! 🎉';
+  questionText.innerText = '';
+  answerBox.style.display = 'none';
+  submitBtn.style.display = 'none';
+  hintBtn.style.display = 'none';
+  stepsBtn.style.display = 'none';
+  hintText.innerText = `✨ Final score: ${state.totalCorrect} correct answers — Well done!`;
+  // rocket fly animation (emoji)
+  const ship = document.querySelector('.shipArea .ship');
+  ship.innerText = '🚀';
+  spawnConfetti(220);
+  playVictoryTune();
+  // show little celebration stickers
+  setTimeout(()=> {
+    // show final modal / big sticker
+    alert('Mission Complete! Fizzoo thanks you 👾 — refresh to play again.');
+  }, 900);
+}
+
+/* ---------- UI helpers ---------- */
+function updateStageUI(){
+  // update title/sub/progress bar
+  const idx = state.stageIndex;
+  const s = STAGES[Math.min(idx, STAGES.length-1)];
+  stageTitle.innerText = `Stage ${Math.min(idx+1, STAGES.length)} — ${s.title}`;
+  stageSub.innerText = `Solve ${s.need} puzzles to complete this part`;
+  const pct = (state.progressInStage / s.need) * 100;
+  missionInner.style.width = pct + '%';
+  alienBubble.innerText = `👽 Fizzoo: ${friendlyMessage()}`;
+  // show/hide buttons/inputs in case of finish
+  answerBox.style.display = 'inline-block';
+  submitBtn.style.display = 'inline-block';
+  hintBtn.style.display = 'inline-block';
+  stepsBtn.style.display = 'inline-block';
+}
+
+/* ---------- Stickers & messages ---------- */
+function randomSticker(){
+  const arr = ['🌟','🚀','🪐','👽','✨','🛸','⭐','🎖️'];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+function renderStickers(){
+  stickerArea.innerHTML = '';
+  state.stickers.slice(-8).forEach(s=>{
+    const el = document.createElement('div'); el.className='sticker'; el.innerText = s;
+    stickerArea.appendChild(el);
+  });
+}
+function friendlyMessage(){
+  const msgs = [
+    "Let's fix it together!",
+    "You can do it, space friend!",
+    "Try a hint if stuck 🌟",
+    "Big brain — little steps!",
+    "Count tens and ones!",
+    "Fizzoo believes in you!"
+  ];
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+function randomPraise(){
+  const p = ["Great job!", "Amazing!", "You rock!", "Nice work!", "Super!"];
+  return p[Math.floor(Math.random()*p.length)];
+}
+
+/* ---------- Confetti (simple) ---------- */
+let confettiParticles = [];
+function spawnConfetti(mult=80){
+  // mult: number of particles
+  for(let i=0;i<mult;i++){
+    confettiParticles.push({
+      x: Math.random()*confettiCanvas.width,
+      y: -10 - Math.random()*200,
+      vx: (Math.random()-0.5)*4,
+      vy: Math.random()*3 + 2,
+      r: Math.random()*6+3,
+      col: `hsl(${Math.random()*360} 85% 65%)`,
+      life: Math.random()*100 + 60
+    });
+  }
+  if(!confettiRunning) runConfetti();
+}
+let confettiRunning = false;
+function runConfetti(){
+  confettiRunning = true;
+  const ctx = confettiCtx;
+  function loop(){
+    ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    for(let i=confettiParticles.length-1;i>=0;i--){
+      const p = confettiParticles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.life--;
+      ctx.fillStyle = p.col;
+      ctx.beginPath();
+      ctx.ellipse(p.x,p.y,p.r,p.r*0.7,0,0,Math.PI*2);
+      ctx.fill();
+      if(p.y > confettiCanvas.height + 50 || p.life<=0) confettiParticles.splice(i,1);
+    }
+    if(confettiParticles.length>0) requestAnimationFrame(loop);
+    else confettiRunning = false;
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Sounds (WebAudio) ---------- */
+let audioCtx = null;
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playTone(freq,dur=0.08,vol=0.05){
+  ensureAudio();
+  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  o.type='sine'; o.frequency.value = freq; g.gain.value = vol;
+  o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);
+}
+function playCorrectSound(){ playTone(880,0.08,0.08); setTimeout(()=>playTone(1320,0.06,0.06),90); }
+function playWrongSound(){ playTone(220,0.06,0.08); setTimeout(()=>playTone(160,0.06,0.06),110); }
+function playVictoryTune(){ playTone(660,0.09,0.08); setTimeout(()=>playTone(880,0.08,0.08),110); setTimeout(()=>playTone(990,0.08,0.08),220); }
+
+/* ---------- Save / Load progress ---------- */
+function loadState(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if(s) return s;
+    return null;
+  }catch(e){ return null; }
+}
+function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function resetProgress(){
+  if(confirm('Reset your mission progress?')) {
+    state = defaultState(); saveState(); location.reload();
+  }
+}
+
+resetBtn.addEventListener('click', resetProgress);
+
+/* ---------- UI wiring ---------- */
+startBtn.addEventListener('click', ()=> { enterMission(); });
+learnBtn.addEventListener('click', ()=> { intro.style.display='none'; mission.style.display='none'; learn.style.display='block'; });
+backFromLearn.addEventListener('click', ()=> { learn.style.display='none'; intro.style.display='block'; });
+
+/* ---------- initial render ---------- */
+function renderBadges(){
+  badgeEngine.style.opacity = state.repaired.engine ? 1 : 0.1;
+  badgeWings.style.opacity = state.repaired.wings ? 1 : 0.1;
+  badgeNav.style.opacity = state.repaired.nav ? 1 : 0.1;
+  badgeDrive.style.opacity = state.repaired.drive ? 1 : 0.1;
+}
+renderBadges();
+renderStickers();
+
+/* if mission was in progress, allow resume */
+if(state.stageIndex>0 || state.totalCorrect>0){
+  // show small resume prompt
+  setTimeout(()=> {
+    if(confirm('Resume your last mission?')) enterMission();
+  }, 500);
+}
+
+/* ---------- small helper: ensure canvas sized ---------- */
+resizeCanvas();
 </script>
-
 </body>
 </html>
