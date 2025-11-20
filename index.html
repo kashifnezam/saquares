@@ -1,509 +1,510 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Alien Rescue — Help Fizzoo! 👾🚀</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Space Squares — Pack 1 (Solar Map)</title>
+<meta name="description" content="Space Squares Adventure — Core framework (Solar System Map)." />
 <style>
   :root{
-    --bg:#041628; --panel:#072033; --accent:#7c3aed; --accent2:#06b6d4;
-    --good:#28c76f; --bad:#ff6b6b; --muted:#9fb2c6;
+    --bg1:#03061a;
+    --bg2:#061233;
+    --panel: rgba(255,255,255,0.03);
+    --accent1:#38bdf8;
+    --accent2:#7c3aed;
+    --muted:#9fb2c6;
+    --good:#22c55e;
+    --danger:#ff6b6b;
     --card-radius:14px;
-    --big:18px;
   }
-  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#001021,#041628 60%); color:#e6f0fb}
-  main{max-width:960px;margin:0 auto;padding:14px;}
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#e6f7ff;background:radial-gradient(1200px 700px at 10% 10%, #061233 0%, #03061a 40%);}
+  .app{max-width:980px;margin:0 auto;padding:12px;}
   header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  h1{font-size:20px;margin:0;color:var(--accent2);text-shadow:0 4px 18px rgba(6,182,212,0.08)}
+  h1{margin:0;font-size:20px;color:var(--accent1);letter-spacing:0.2px}
   .sub{color:var(--muted);font-size:13px}
-  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:var(--card-radius); padding:12px; margin-top:12px; box-shadow:0 10px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.02)}
+  /* map area */
+  .mapWrap{margin-top:14px;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 18px 40px rgba(2,6,23,0.6)}
+  .mapCanvas{width:100%;height:calc(70vw); max-height:520px; position:relative; touch-action:none}
+  .sun{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#ffd166,#ff9f1c);box-shadow:0 10px 40px rgba(255,158,45,0.18);font-weight:900;color:#1b1b1b}
+  .planet{position:absolute;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;box-shadow:0 10px 28px rgba(2,6,23,0.6);cursor:pointer;touch-action:manipulation}
+  .planet.small{width:36px;height:36px;font-size:13px}
+  .planet.locked{opacity:0.35;filter:grayscale(30%);cursor:not-allowed}
+  .planetLabel{position:absolute;white-space:nowrap;font-size:12px;color:var(--muted);transform:translate(-50%,8px)}
+  /* bottom panel */
+  .panel{margin-top:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
   .row{display:flex;gap:8px;align-items:center}
-  button.btn{background:linear-gradient(90deg,var(--accent),#5b21b6); color:white;border:0;padding:12px 14px;border-radius:12px;font-weight:800;font-size:16px;box-shadow:0 8px 26px rgba(99,102,241,0.12);cursor:pointer}
-  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:10px;border-radius:10px}
-  .center{display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .bigText{font-size:22px;font-weight:800}
-  .hint{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-top:10px;color:var(--muted)}
-  input[type=number]{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--accent2);font-weight:800;width:160px;text-align:center;font-size:18px}
-  .feedback{min-height:36px;font-weight:900;margin-top:8px}
-  /* progress / mission bar */
-  .missionBar{height:14px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;margin-top:10px}
-  .missionInner{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0%;transition:width 400ms}
-  /* ship area */
-  .shipArea{height:180px;display:flex;align-items:center;justify-content:center;position:relative}
-  .ship{font-size:48px;filter:drop-shadow(0 12px 20px rgba(0,0,0,0.6))}
-  .partBadge{position:absolute; font-size:28px; opacity:0.0; transition:all 600ms; pointer-events:none}
-  .badge-engine{left:20%;top:18%}
-  .badge-wings{left:78%;top:22%}
-  .badge-nav{left:50%;top:6%}
-  .badge-drive{left:50%;bottom:6%}
-  /* stickers area */
-  .stickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .sticker{background:linear-gradient(90deg,#ffd8a8,#ffd1f3);color:#1f2937;padding:8px 10px;border-radius:10px;font-weight:800}
-  /* small responsive */
-  @media(min-width:700px){ .ship{font-size:72px} input[type=number]{width:220px} .bigText{font-size:26px} }
-  /* confetti canvas */
-  #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
-  /* playful alien bubble */
-  .alienBubble{background:linear-gradient(180deg,#07324a,#072439);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 6px 18px rgba(2,6,23,0.6);color:var(--muted);font-weight:700}
-  footer{color:var(--muted);font-size:13px;margin-top:14px;text-align:center}
+  button.btn{background:linear-gradient(90deg,var(--accent2),#5b21b6);color:white;border:0;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:10px}
+  .small{font-size:13px;color:var(--muted)}
+  /* mission overlay */
+  .overlay{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+  .overlay.show{display:flex}
+  .modal{width:100%;max-width:720px;background:linear-gradient(180deg,#071428,#071a2e);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 40px 100px rgba(2,6,23,0.6)}
+  .center{display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .bigTitle{font-size:20px;font-weight:900;color:var(--accent1)}
+  input[type=number]{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--accent1);font-weight:800;width:160px;text-align:center}
+  .feedback{min-height:36px;font-weight:800;margin-top:8px}
+  .hintBox{margin-top:10px;padding:10px;background:rgba(255,255,255,0.02);border-radius:10px;color:var(--muted)}
+  .progressBar{height:12px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;margin-top:10px}
+  .progressInner{height:100%;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:0%;transition:width 350ms}
+  /* stickers row */
+  .stickRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .sticker{background:linear-gradient(90deg,#ffd8a8,#ffd1f3);color:#1f2937;padding:6px 10px;border-radius:10px;font-weight:800}
+  /* small responsive tweaks */
+  @media(min-width:760px){ .mapCanvas{height:420px} .planet{width:54px;height:54px} .sun{width:90px;height:90px} }
 </style>
 </head>
+
 <body>
-<canvas id="confetti"></canvas>
-<main>
-  <header>
-    <div>
-      <h1>Alien Rescue — Help Fizzoo! 👾</h1>
-      <div class="sub">Solve squares to repair the spaceship & send Fizzoo home 🌌</div>
-    </div>
-    <div class="row">
-      <button id="resetBtn" class="ghost">Reset</button>
-    </div>
-  </header>
-
-  <!-- Story Intro -->
-  <section id="intro" class="panel center">
-    <div class="bigText">🚨 Fizzoo's spaceship broke! 🚨</div>
-    <p class="sub" style="max-width:520px">Fizzoo the friendly alien needs your help. Solve number puzzles (squares) to fix 4 ship parts: <b>Engine</b>, <b>Solar Wings</b>, <b>Navigation</b>, and <b>Hyperdrive</b>. Each correct answer gives tools to repair a part.</p>
-    <div style="margin-top:12px" class="row">
-      <button id="startMission" class="btn">Start Mission</button>
-      <button id="learnBtn" class="ghost">Learn Squares</button>
-    </div>
-  </section>
-
-  <!-- Learn (cheat-sheet) -->
-  <section id="learn" class="panel" style="display:none">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div class="bigText">Space Academy — Squares 2–50</div>
-      <button id="backFromLearn" class="ghost">Back</button>
-    </div>
-    <div style="margin-top:8px;color:var(--muted)">Tap any card to reveal the square</div>
-    <div id="learnGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px"></div>
-  </section>
-
-  <!-- Mission -->
-  <section id="mission" class="panel" style="display:none">
-    <div class="row" style="justify-content:space-between;align-items:center">
+  <div class="app">
+    <header>
       <div>
-        <div class="bigText" id="stageTitle">Stage 1 — Repair Engine</div>
-        <div class="sub" id="stageSub">Solve 5 puzzles to fix the Engine</div>
+        <h1>Space Squares — Solar Map</h1>
+        <div class="sub">Tap a planet to start the mission. Repair ship parts on each planet!</div>
       </div>
-      <div style="text-align:right">
-        <div class="alienBubble" id="alienBubble">👾 Hello! I'm Fizzoo — I will give tips!</div>
+      <div class="row">
+        <button id="btnResume" class="ghost">Resume</button>
+        <button id="btnReset" class="ghost">Reset</button>
       </div>
-    </div>
+    </header>
 
-    <!-- ship visual -->
-    <div class="shipArea">
-      <div class="ship">🛸</div>
-      <div class="partBadge badge-engine" id="badgeEngine">🔧</div>
-      <div class="partBadge badge-wings" id="badgeWings">🪽</div>
-      <div class="partBadge badge-nav" id="badgeNav">🧭</div>
-      <div class="partBadge badge-drive" id="badgeDrive">⚡</div>
-    </div>
-
-    <!-- Mission progress -->
-    <div class="missionBar"><div class="missionInner" id="missionInner"></div></div>
-
-    <!-- Puzzle area -->
-    <div style="margin-top:12px" class="center">
-      <div class="bigText" id="questionText">What is 2² ?</div>
-      <div style="margin-top:10px">
-        <input id="answerBox" type="number" inputmode="numeric" placeholder="Your answer">
+    <section class="mapWrap">
+      <div id="map" class="mapCanvas" aria-hidden="false">
+        <!-- Sun -->
+        <div class="sun" id="sun">☀</div>
+        <!-- Planets will be placed by JS -->
       </div>
+      <div style="margin-top:10px" class="small">Planets: Mercury → Venus → Earth → Mars → Jupiter → Saturn → Uranus → Neptune</div>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <div class="small">Current Mission</div>
+          <div id="missionSummary" style="font-weight:900">No mission running — choose a planet</div>
+        </div>
+        <div class="small" id="progressSummary">Progress: 0/0</div>
+      </div>
+
       <div style="margin-top:10px" class="row">
-        <button id="submitBtn" class="btn">Submit</button>
-        <button id="hintBtn" class="ghost">Hint</button>
-        <button id="stepsBtn" class="ghost">Show Steps</button>
+        <button id="learnBtn" class="btn">Space Academy (Learn)</button>
+        <button id="openMissions" class="ghost">My Missions</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Mission overlay (modal) -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true">
+    <div class="modal center" id="modal">
+      <div style="width:100%;display:flex;justify-content:space-between;align-items:center">
+        <div class="bigTitle" id="modalTitle">Mission</div>
+        <div><button id="closeModal" class="ghost">Close</button></div>
       </div>
 
-      <div class="feedback" id="feedback"></div>
-      <div class="hint" id="hintText">Fizzoo: Tap Hint for a friendly clue.</div>
-
-      <div style="margin-top:10px" class="stickers" id="stickers"></div>
+      <div id="modalBody" style="margin-top:12px;width:100%"></div>
     </div>
-  </section>
-
-  <footer>Tip: Hints are friendly clues — try thinking of tens & ones or endings like 25 for numbers ending with 5!</footer>
-</main>
+  </div>
 
 <script>
-/* ---------- Data & Persistent state ---------- */
-const STAGES = [
-  { id: 'engine', title:'Repair Engine', need: 5 },
-  { id: 'wings', title:'Fix Solar Wings', need: 5 },
-  { id: 'nav', title:'Restore Navigation', need: 5 },
-  { id: 'drive', title:'Start Hyperdrive', need: 5 }
-];
-const NUM_MIN = 2, NUM_MAX = 50;
-const LS_KEY = 'alien_rescue_progress_v1';
+/* ================= Pack 1 — Core framework =================
+   - Solar System map (circular)
+   - Planet selection + locking
+   - Mission launcher overlay (basic mission using squares)
+   - Progress saved in localStorage (LS_KEY)
+   - Placeholders for packs 2..5: voice, animations, minigames, ending, progress chart
+   =========================================================== */
 
-let state = loadState(); // will initialize if empty
+const LS_KEY = 'space_squares_pack1_v1';
+
+// Planets (Solar order) - each becomes a "level"
+const PLANETS = [
+  { id:'mercury', name:'Mercury', color:'#ef4444' },
+  { id:'venus',   name:'Venus',   color:'#f97316' },
+  { id:'earth',   name:'Earth',   color:'#0ea5e9' },
+  { id:'mars',    name:'Mars',    color:'#fb7185' },
+  { id:'jupiter', name:'Jupiter', color:'#fbbf24' },
+  { id:'saturn',  name:'Saturn',  color:'#f59e0b' },
+  { id:'uranus',  name:'Uranus',  color:'#7dd3fc' },
+  { id:'neptune', name:'Neptune', color:'#7c3aed' }
+];
+
+const NUM_MIN = 2, NUM_MAX = 50;
+
+// Default state stored in localStorage
 function defaultState(){
   return {
-    stageIndex: 0,
-    progressInStage: 0,
-    repaired: { engine:false, wings:false, nav:false, drive:false },
+    planets: PLANETS.map(p => ({ id:p.id, unlocked: (p.id === 'mercury'), completed:false, correct:0 })),
+    currentPlanet: null,
+    missionProgress: 0,
+    missionNeeded: 5,
     stickers: [],
     totalCorrect: 0
   };
 }
-if(!state) { state = defaultState(); saveState(); }
+let state = loadState() || defaultState();
+saveState(); // ensure saved if fresh
 
-/* ---------- Simple DOM refs ---------- */
-const intro = document.getElementById('intro');
-const mission = document.getElementById('mission');
-const learn = document.getElementById('learn');
-const startBtn = document.getElementById('startMission');
-const learnBtn = document.getElementById('learnBtn');
-const backFromLearn = document.getElementById('backFromLearn');
-const stageTitle = document.getElementById('stageTitle');
-const stageSub = document.getElementById('stageSub');
-const questionText = document.getElementById('questionText');
-const answerBox = document.getElementById('answerBox');
-const submitBtn = document.getElementById('submitBtn');
-const hintBtn = document.getElementById('hintBtn');
-const stepsBtn = document.getElementById('stepsBtn');
-const feedback = document.getElementById('feedback');
-const missionInner = document.getElementById('missionInner');
-const hintText = document.getElementById('hintText');
-const stickerArea = document.getElementById('stickers');
-const alienBubble = document.getElementById('alienBubble');
-const resetBtn = document.getElementById('resetBtn');
-const badgeEngine = document.getElementById('badgeEngine');
-const badgeWings = document.getElementById('badgeWings');
-const badgeNav = document.getElementById('badgeNav');
-const badgeDrive = document.getElementById('badgeDrive');
+/* ---------- Map rendering (circle) ---------- */
+const mapEl = document.getElementById('map');
+const sunEl = document.getElementById('sun');
 
-/* confetti canvas */
-const confettiCanvas = document.getElementById('confetti');
-const confettiCtx = confettiCanvas.getContext('2d');
-function resizeCanvas(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-/* ---------- Build Learn Grid ---------- */
-function buildLearnGrid(){
-  const grid = document.getElementById('learnGrid');
-  grid.innerHTML = '';
-  for(let n=NUM_MIN; n<=NUM_MAX; n++){
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `<div style="font-size:18px;font-weight:900">${n}</div><div style="margin-top:6px" data-hidden>Tap to reveal</div>`;
-    el.addEventListener('click', ()=>{
-      const d = el.querySelector('[data-hidden]');
-      if(d) d.innerText = (n*n);
-    });
-    grid.appendChild(el);
-  }
-}
-buildLearnGrid();
-
-/* ---------- Stage logic ---------- */
-let currentNumber = null;
-function enterMission(){
-  intro.style.display = 'none';
-  learn.style.display = 'none';
-  mission.style.display = 'block';
-  updateStageUI();
-  generateQuestion();
-  renderBadges();
-  renderStickers();
-}
-function updateStageUI(){
-  const s = STAGES[state.stageIndex];
-  stageTitle.innerText = `Stage ${state.stageIndex+1} — ${s.title}`;
-  stageSub.innerText = `Solve ${s.need} puzzles to complete this part`;
-  const pct = (state.progressInStage / s.need) * 100;
-  missionInner.style.width = pct + '%';
-  alienBubble.innerText = `👾 Fizzoo: ${friendlyMessage()}`;
-}
-
-/* generate a random number between 2 & 50 that hasn't appeared too often */
-function pickNumber(){
-  return Math.floor(Math.random()*(NUM_MAX-NUM_MIN+1)) + NUM_MIN;
-}
-
-/* Show question */
-function generateQuestion(){
-  currentNumber = pickNumber();
-  questionText.innerText = `What is ${currentNumber} × ${currentNumber} ?`;
-  answerBox.value = '';
-  feedback.innerText = '';
-  hintText.innerText = 'Fizzoo: Tap Hint for a gentle clue.';
-  // small friendly auto-hint preview (non-spoiler)
-  setTimeout(()=> hintText.innerText = `Fizzoo: Tip — look at the last digit or split tens & ones!`, 1200);
-}
-
-/* ---------- Hints & Steps (context-aware) ---------- */
-function contextHint(n){
-  const last = n % 10;
-  if(last === 5) return `Ends with 5 → square ends with 25. Multiply the left digits then add 25.`;
-  if(Math.abs(n-50) <= 5){
-    const d = n-50;
-    return `Near 50 → 50²=2500. Then: n² = 2500 + ${d*100} + ${d*d}.`;
-  }
-  if(n < 30) return `Split: (${Math.floor(n/10)*10} + ${n%10})² = tens² + 2×tens×ones + ones².`;
-  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
-  return `Last-digit trick: If number ends with ${last}, its square ends with ${endings[last]}.`;
-}
-function showHint(){
-  hintText.innerText = `👽 Alien hint: ` + contextHint(currentNumber);
-}
-function showSteps(){
-  // more detailed but short
-  let n = currentNumber;
-  if(String(n).endsWith('5')){
-    const a = Math.floor(n/10);
-    hintText.innerText = `Steps: ${n}² → ${a}×${a+1} = ${a*(a+1)} then append 25 → ${a*(a+1)}25`;
-    return;
-  }
-  if(Math.abs(n-50) <= 5){
-    const d = n-50;
-    hintText.innerText = `Steps: ${n}² = 2500 + ${d*100} + ${d*d} = ${2500 + d*100 + d*d}`;
-    return;
-  }
-  if(n<30){
-    const t = Math.floor(n/10)*10, u = n%10;
-    hintText.innerText = `Steps: (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u} = ${t*t + 2*t*u + u*u}`;
-    return;
-  }
-  hintText.innerText = `Steps: Use (n-1)(n+1)+1 → ${n}² = ${(n-1)*(n+1)} + 1 = ${(n-1)*(n+1) + 1}`;
-}
-
-/* ---------- Answer checking & rewards ---------- */
-submitBtn.addEventListener('click', ()=> { checkAnswer(false); });
-answerBox.addEventListener('keypress', e => { if(e.key==='Enter') checkAnswer(false); });
-hintBtn.addEventListener('click', showHint);
-stepsBtn.addEventListener('click', showSteps);
-
-function checkAnswer(auto=false){
-  const val = Number(answerBox.value);
-  const correct = currentNumber * currentNumber;
-  if(!auto && val === correct){
-    onCorrect();
-  } else {
-    onWrong(correct);
-  }
-}
-
-function onCorrect(){
-  feedback.style.color = 'var(--good)';
-  feedback.innerText = randomPraise();
-  // progress
-  state.progressInStage++;
-  state.totalCorrect = (state.totalCorrect || 0) + 1;
-  // sticker reward
-  const s = randomSticker();
-  state.stickers.push(s);
-  saveState();
-  renderStickers();
-  // small confetti + sound + animate badge
-  spawnConfetti();
-  playCorrectSound();
-  if(state.progressInStage >= STAGES[state.stageIndex].need){
-    // mark repaired
-    const id = STAGES[state.stageIndex].id;
-    state.repaired[id] = true;
-    state.stageIndex = Math.min(state.stageIndex + 1, STAGES.length - 1);
-    state.progressInStage = 0;
-    // animate badge reveal
-    revealBadge(id);
-    saveState();
-    // slight delay to show success then advance or finish
-    setTimeout(()=> {
-      if(allRepaired()){ missionComplete(); }
-      else { updateStageUI(); generateQuestion(); }
-    }, 1100);
-  } else {
-    saveState();
-    updateStageUI();
-    setTimeout(()=> generateQuestion(), 900);
-  }
-}
-
-function onWrong(correct){
-  feedback.style.color = 'var(--bad)';
-  feedback.innerText = `Oops — the correct answer is ${correct}. Try next puzzle!`;
-  playWrongSound();
-  // small shake or hint
-  hintText.innerText = 'Fizzoo: Don’t worry — try using the steps button!';
-  // still proceed to next puzzle to keep flow
-  state.totalCorrect = state.totalCorrect || 0;
-  setTimeout(()=> { updateStageUI(); generateQuestion(); }, 1200);
-}
-
-/* ---------- Stage completion & final ---------- */
-function allRepaired(){
-  return Object.values(state.repaired).every(v=>v===true);
-}
-
-function revealBadge(partId){
-  if(partId === 'engine'){ badgeEngine.style.opacity = 1; badgeEngine.style.transform = 'scale(1.2)'; setTimeout(()=> badgeEngine.style.transform='scale(1)',300); }
-  if(partId === 'wings'){ badgeWings.style.opacity = 1; badgeWings.style.transform = 'scale(1.2)'; setTimeout(()=> badgeWings.style.transform='scale(1)',300); }
-  if(partId === 'nav'){ badgeNav.style.opacity = 1; badgeNav.style.transform = 'scale(1.2)'; setTimeout(()=> badgeNav.style.transform='scale(1)',300); }
-  if(partId === 'drive'){ badgeDrive.style.opacity = 1; badgeDrive.style.transform = 'scale(1.2)'; setTimeout(()=> badgeDrive.style.transform='scale(1)',300); }
-}
-
-/* mission complete */
-function missionComplete(){
-  stageTitle.innerText = 'Mission Complete — Launch!';
-  stageSub.innerText = 'You repaired all parts. Fizzoo is going home! 🎉';
-  questionText.innerText = '';
-  answerBox.style.display = 'none';
-  submitBtn.style.display = 'none';
-  hintBtn.style.display = 'none';
-  stepsBtn.style.display = 'none';
-  hintText.innerText = `✨ Final score: ${state.totalCorrect} correct answers — Well done!`;
-  // rocket fly animation (emoji)
-  const ship = document.querySelector('.shipArea .ship');
-  ship.innerText = '🚀';
-  spawnConfetti(220);
-  playVictoryTune();
-  // show little celebration stickers
-  setTimeout(()=> {
-    // show final modal / big sticker
-    alert('Mission Complete! Fizzoo thanks you 👾 — refresh to play again.');
-  }, 900);
-}
-
-/* ---------- UI helpers ---------- */
-function updateStageUI(){
-  // update title/sub/progress bar
-  const idx = state.stageIndex;
-  const s = STAGES[Math.min(idx, STAGES.length-1)];
-  stageTitle.innerText = `Stage ${Math.min(idx+1, STAGES.length)} — ${s.title}`;
-  stageSub.innerText = `Solve ${s.need} puzzles to complete this part`;
-  const pct = (state.progressInStage / s.need) * 100;
-  missionInner.style.width = pct + '%';
-  alienBubble.innerText = `👽 Fizzoo: ${friendlyMessage()}`;
-  // show/hide buttons/inputs in case of finish
-  answerBox.style.display = 'inline-block';
-  submitBtn.style.display = 'inline-block';
-  hintBtn.style.display = 'inline-block';
-  stepsBtn.style.display = 'inline-block';
-}
-
-/* ---------- Stickers & messages ---------- */
-function randomSticker(){
-  const arr = ['🌟','🚀','🪐','👽','✨','🛸','⭐','🎖️'];
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-function renderStickers(){
-  stickerArea.innerHTML = '';
-  state.stickers.slice(-8).forEach(s=>{
-    const el = document.createElement('div'); el.className='sticker'; el.innerText = s;
-    stickerArea.appendChild(el);
+function placePlanets(){
+  // compute center & radius based on map size
+  const rect = mapEl.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+  // pick radii for rings (progressively further from sun)
+  const ringR = Math.min(cx, cy) * 0.72;
+  const step = ringR / (PLANETS.length + 1);
+  // we'll place planets in a rough circular orbit positions
+  PLANETS.forEach((p, i) => {
+    let el = document.getElementById('planet-'+p.id);
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'planet';
+      el.id = 'planet-'+p.id;
+      el.setAttribute('data-id', p.id);
+      el.title = p.name;
+      el.innerHTML = `<div style="pointer-events:none">${p.name[0]}</div><div class="planetLabel" id="label-${p.id}">${p.name}</div>`;
+      mapEl.appendChild(el);
+      el.addEventListener('click', onPlanetClick);
+    }
+    // circular distribution angles across 360 deg
+    const angle = (i / PLANETS.length) * Math.PI * 2 - Math.PI/2; // start at top
+    const r = step * (i + 1);
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    el.style.left = (x - el.offsetWidth/2) + 'px';
+    el.style.top = (y - el.offsetHeight/2) + 'px';
+    el.style.background = `radial-gradient(circle at 30% 30%, ${p.color}, ${shadeColor(p.color, -18)})`;
+    // locked/unlocked display
+    const planetState = state.planets.find(q => q.id === p.id);
+    if(!planetState || !planetState.unlocked){
+      el.classList.add('locked'); el.querySelector('.planetLabel').style.opacity = 0.38;
+    } else {
+      el.classList.remove('locked'); el.querySelector('.planetLabel').style.opacity = 1;
+    }
+    // show small badge if completed
+    if(planetState && planetState.completed){
+      el.style.boxShadow = '0 18px 40px rgba(34,197,94,0.12)';
+    }
   });
 }
-function friendlyMessage(){
-  const msgs = [
-    "Let's fix it together!",
-    "You can do it, space friend!",
-    "Try a hint if stuck 🌟",
-    "Big brain — little steps!",
-    "Count tens and ones!",
-    "Fizzoo believes in you!"
-  ];
-  return msgs[Math.floor(Math.random()*msgs.length)];
+
+// small helper to darken color
+function shadeColor(hex, percent) {
+  // hex like #rrggbb
+  const num = parseInt(hex.replace('#',''),16), amt = Math.round(2.55*percent);
+  const R = (num >> 16) + amt, G = (num >> 8 & 0x00FF) + amt, B = (num & 0x0000FF) + amt;
+  return '#' + (0x1000000 + (clamp(R,0,255)<<16) + (clamp(G,0,255)<<8) + clamp(B,0,255)).toString(16).slice(1);
 }
-function randomPraise(){
-  const p = ["Great job!", "Amazing!", "You rock!", "Nice work!", "Super!"];
-  return p[Math.floor(Math.random()*p.length)];
+function clamp(v,a,b){ return Math.min(b, Math.max(a, v)); }
+
+/* ---------- Planet click handler ---------- */
+function onPlanetClick(e){
+  const id = this.getAttribute('data-id');
+  const pState = state.planets.find(p => p.id === id);
+  if(!pState || !pState.unlocked){
+    showModal(`Planet locked! Complete earlier missions to unlock ${PLANETS.find(x=>x.id===id).name}.`);
+    return;
+  }
+  // set currentPlanet and open mission modal
+  state.currentPlanet = id;
+  saveState();
+  openMissionModal(id);
 }
 
-/* ---------- Confetti (simple) ---------- */
-let confettiParticles = [];
-function spawnConfetti(mult=80){
-  // mult: number of particles
-  for(let i=0;i<mult;i++){
-    confettiParticles.push({
-      x: Math.random()*confettiCanvas.width,
-      y: -10 - Math.random()*200,
-      vx: (Math.random()-0.5)*4,
-      vy: Math.random()*3 + 2,
-      r: Math.random()*6+3,
-      col: `hsl(${Math.random()*360} 85% 65%)`,
-      life: Math.random()*100 + 60
-    });
-  }
-  if(!confettiRunning) runConfetti();
+/* ---------- Mission modal (basic mission using squares) ---------- */
+const overlay = document.getElementById('overlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const closeModalBtn = document.getElementById('closeModal');
+
+closeModalBtn.addEventListener('click', closeModal);
+
+function openMissionModal(planetId){
+  // set up mission content HTML
+  const planetMeta = PLANETS.find(p=>p.id===planetId);
+  modalTitle.innerText = `Mission: ${planetMeta.name}`;
+  modalBody.innerHTML = missionBodyHTML(planetId);
+  overlay.classList.add('show');
+  wireMissionEvents(planetId);
+  updateMissionUI(); // refresh progress
 }
-let confettiRunning = false;
-function runConfetti(){
-  confettiRunning = true;
-  const ctx = confettiCtx;
-  function loop(){
-    ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-    for(let i=confettiParticles.length-1;i>=0;i--){
-      const p = confettiParticles[i];
-      p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.life--;
-      ctx.fillStyle = p.col;
-      ctx.beginPath();
-      ctx.ellipse(p.x,p.y,p.r,p.r*0.7,0,0,Math.PI*2);
-      ctx.fill();
-      if(p.y > confettiCanvas.height + 50 || p.life<=0) confettiParticles.splice(i,1);
+
+function closeModal(){
+  overlay.classList.remove('show');
+}
+
+/* mission UI markup (simple) */
+function missionBodyHTML(planetId){
+  // dynamic placeholders: questionText, answerBox, submitBtn, hint, progressInner, stickersArea
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:900;color:var(--accent1)">${PLANETS.find(p=>p.id===planetId).name} — Repair the ship!</div>
+      <div class="small">Planet mission</div>
+    </div>
+
+    <div style="margin-top:12px" class="center">
+      <div class="bigTitle" id="questionText">What is 2 × 2 ?</div>
+
+      <div style="margin-top:10px"><input id="answerBox" type="number" inputmode="numeric" placeholder="Your answer" /></div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <button id="submitAns" class="btn">Submit</button>
+        <button id="hintBtn" class="ghost">Hint</button>
+        <button id="stepsBtn" class="ghost">Show Steps</button>
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+      <div class="hintBox" id="hintBox">Hint will appear here.</div>
+
+      <div class="progressBar" style="width:100%;margin-top:12px">
+        <div class="progressInner" id="progressInner" style="width:0%"></div>
+      </div>
+
+      <div class="stickRow" id="stickers" style="margin-top:10px"></div>
+    </div>
+  `;
+}
+
+/* events inside mission modal */
+function wireMissionEvents(planetId){
+  const submitBtn = document.getElementById('submitAns');
+  const hintBtn = document.getElementById('hintBtn');
+  const stepsBtn = document.getElementById('stepsBtn');
+  const answerBox = document.getElementById('answerBox');
+
+  // keyboard enter
+  answerBox.addEventListener('keypress', function(e){ if(e.key==='Enter'){ submitBtn.click(); }});
+
+  submitBtn.onclick = () => {
+    const val = Number(answerBox.value);
+    checkMissionAnswer(planetId, val);
+  };
+  hintBtn.onclick = () => {
+    // context hint (non-spoiler)
+    document.getElementById('hintBox').innerText = planetHint();
+  };
+  stepsBtn.onclick = () => {
+    document.getElementById('hintBox').innerText = planetSteps();
+  };
+}
+
+/* ---------- Mission logic (simple for Pack 1) ---------- */
+function updateMissionUI(){
+  // update mission title and progress if modal open
+  if(!state.currentPlanet) {
+    document.getElementById('missionSummary').innerText = 'No mission running — choose a planet';
+    document.getElementById('progressSummary').innerText = '';
+    return;
+  }
+  const p = state.planets.find(x=>x.id === state.currentPlanet);
+  const done = p.correct || 0;
+  document.getElementById('missionSummary').innerText = `Planet ${PLANETS.find(x=>x.id===p.id).name} — Correct: ${done}`;
+  document.getElementById('progressSummary').innerText = `Progress: ${done}/${state.missionNeeded}`;
+  // if modal open also update modal UI
+  const qi = document.getElementById('questionText');
+  if(qi){
+    qi.innerText = `What is ${currentQuestion} × ${currentQuestion} ?`;
+    const pct = ((p.correct || 0) / state.missionNeeded) * 100;
+    const inner = document.getElementById('progressInner');
+    if(inner) inner.style.width = pct + '%';
+    renderStickersUI();
+  }
+}
+
+/* mission local question generator */
+let currentQuestion = null;
+function newMissionQuestion(){
+  currentQuestion = Math.floor(Math.random() * (NUM_MAX - NUM_MIN + 1)) + NUM_MIN;
+  return currentQuestion;
+}
+
+/* check answer inside mission modal */
+function checkMissionAnswer(planetId, userVal){
+  const correct = currentQuestion * currentQuestion;
+  const fb = document.getElementById('feedback');
+  if(userVal === correct){
+    fb.style.color = getComputedStyle(document.body).getPropertyValue('--good') || '#22c55e';
+    fb.innerText = 'Great! Correct! ✨';
+    // reward: increment planet correct
+    const p = state.planets.find(x=>x.id === planetId);
+    p.correct = (p.correct || 0) + 1;
+    p.unlocked = true;
+    state.totalCorrect = (state.totalCorrect || 0) + 1;
+    state.stickers.push(randomSticker());
+    // if planet mission completed mark completed & unlock next planet
+    if(p.correct >= state.missionNeeded){
+      p.completed = true;
+      unlockNextPlanet(planetId);
+      // small message and close modal after short delay
+      setTimeout(()=> {
+        saveState();
+        closeModal();
+        renderMap();
+        showModal(`Nice! You repaired the part on ${PLANETS.find(x=>x.id===planetId).name}. Next planet unlocked!`);
+      }, 900);
+    } else {
+      saveState();
+      // generate new question quickly
+      setTimeout(()=> {
+        generateQuestionAndUpdate();
+      }, 700);
     }
-    if(confettiParticles.length>0) requestAnimationFrame(loop);
-    else confettiRunning = false;
+  } else {
+    fb.style.color = getComputedStyle(document.body).getPropertyValue('--danger') || '#ff6b6b';
+    fb.innerText = `Oops — correct is ${correct}. Don't worry, next one!`;
+    // proceed to next question after delay
+    setTimeout(()=> generateQuestionAndUpdate(), 900);
   }
-  requestAnimationFrame(loop);
 }
 
-/* ---------- Sounds (WebAudio) ---------- */
-let audioCtx = null;
-function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-function playTone(freq,dur=0.08,vol=0.05){
-  ensureAudio();
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.type='sine'; o.frequency.value = freq; g.gain.value = vol;
-  o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);
+/* helper to generate question and update UI */
+function generateQuestionAndUpdate(){
+  newMissionQuestion();
+  const qi = document.getElementById('questionText');
+  if(qi) qi.innerText = `What is ${currentQuestion} × ${currentQuestion} ?`;
+  updateMissionUI();
 }
-function playCorrectSound(){ playTone(880,0.08,0.08); setTimeout(()=>playTone(1320,0.06,0.06),90); }
-function playWrongSound(){ playTone(220,0.06,0.08); setTimeout(()=>playTone(160,0.06,0.06),110); }
-function playVictoryTune(){ playTone(660,0.09,0.08); setTimeout(()=>playTone(880,0.08,0.08),110); setTimeout(()=>playTone(990,0.08,0.08),220); }
 
-/* ---------- Save / Load progress ---------- */
-function loadState(){
-  try{
-    const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-    if(s) return s;
-    return null;
-  }catch(e){ return null; }
+/* unlock next planet in solar order */
+function unlockNextPlanet(currentPlanetId){
+  const idx = PLANETS.findIndex(p => p.id === currentPlanetId);
+  if(idx >= 0 && idx < PLANETS.length - 1){
+    const nextId = PLANETS[idx + 1].id;
+    const pObj = state.planets.find(x => x.id === nextId);
+    if(pObj) pObj.unlocked = true;
+    else state.planets.push({ id: nextId, unlocked:true, completed:false, correct:0 });
+  }
+  saveState();
 }
+
+/* context hint / steps (simple) */
+function planetHint(){
+  const last = currentQuestion % 10;
+  const endings = {0:'00',1:'1',2:'4',3:'9',4:'6',5:'25',6:'36',7:'49',8:'64',9:'81'};
+  if(last === 5) return `Hint: ends with 5 → its square ends with 25 (try tens trick).`;
+  return `Hint: number ends with ${last}, so square ends with ${endings[last]}.`;
+}
+function planetSteps(){
+  const n = currentQuestion;
+  if(String(n).endsWith('5')){
+    const a = Math.floor(n/10);
+    return `Steps: ${n}² -> ${a}×${a+1} = ${a*(a+1)} then append 25 -> ${a*(a+1)}25`;
+  }
+  if(n < 30){
+    const t = Math.floor(n/10)*10, u = n%10;
+    return `Split: (${t}+${u})² = ${t*t} + 2×${t}×${u} + ${u*u}`;
+  }
+  return `Use (n-1)(n+1)+1: ${n}² = ${(n-1)*(n+1)} + 1`;
+}
+
+/* random sticker */
+function randomSticker(){ const arr = ['🌟','🚀','🪐','👾','✨','🛸']; return arr[Math.floor(Math.random()*arr.length)]; }
+function renderStickersUI(){
+  const dv = document.getElementById('stickers');
+  if(!dv) return;
+  dv.innerHTML = '';
+  state.stickers.slice(-6).forEach(s => {
+    const el = document.createElement('div'); el.className='sticker'; el.innerText = s;
+    dv.appendChild(el);
+  });
+}
+
+/* ---------- Utilities: modal, learn screen, resume/reset ---------- */
+function showModal(message){
+  // very simple modal using overlay modal
+  const prev = overlay.querySelector('#modalBody');
+  if(prev) prev.innerHTML = `<div style="padding:12px">${message}</div>`;
+  overlay.classList.add('show');
+  setTimeout(()=> overlay.classList.remove('show'), 1800);
+}
+
+document.getElementById('learnBtn').addEventListener('click', ()=> {
+  // show learn screen in modal to keep single-file flow
+  modalTitle.innerText = 'Space Academy — Learn Squares';
+  modalBody.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:60vh;overflow:auto;padding-top:6px"></div>`;
+  const grid = modalBody.querySelector('div');
+  for(let n = NUM_MIN; n <= NUM_MAX; n++){
+    const c = document.createElement('div'); c.style.background='rgba(255,255,255,0.02)'; c.style.border='1px solid rgba(255,255,255,0.02)'; c.style.padding='8px'; c.style.borderRadius='8px';
+    c.style.textAlign='center'; c.innerHTML = `<div style="font-weight:900">${n}</div><div style="opacity:0.7">${n*n}</div>`;
+    grid.appendChild(c);
+  }
+  overlay.classList.add('show');
+});
+
+document.getElementById('btnReset').addEventListener('click', ()=> {
+  if(confirm('Reset all progress?')) { state = defaultState(); saveState(); renderMap(); showToast('Progress reset'); }
+});
+
+document.getElementById('btnResume').addEventListener('click', ()=> {
+  if(state.currentPlanet) openMissionModal(state.currentPlanet);
+  else alert('No mission in progress yet.');
+});
+
+/* small toast */
+function showToast(txt){ const old = document.getElementById('__toast'); if(old) old.remove(); const t = document.createElement('div'); t.id='__toast'; t.style.position='fixed'; t.style.left='50%'; t.style.bottom='24px'; t.style.transform='translateX(-50%)'; t.style.background='linear-gradient(90deg,#06b6d4,#7c3aed)'; t.style.color='white'; t.style.padding='10px 14px'; t.style.borderRadius='12px'; t.style.boxShadow='0 18px 40px rgba(0,0,0,0.6)'; t.innerText = txt; document.body.appendChild(t); setTimeout(()=> t.remove(),1600); }
+
+/* ---------- persistence ---------- */
 function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-function resetProgress(){
-  if(confirm('Reset your mission progress?')) {
-    state = defaultState(); saveState(); location.reload();
+function loadState(){ try{return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){return null;} }
+
+/* ---------- render map & initial question ---------- */
+function renderMap(){
+  placePlanets();
+  // mission summary
+  if(state.currentPlanet){
+    const p = state.planets.find(x => x.id === state.currentPlanet);
+    document.getElementById('missionSummary').innerText = `Resuming mission on ${PLANETS.find(x=>x.id===p.id).name}`;
+  } else {
+    document.getElementById('missionSummary').innerText = 'No mission running — choose a planet';
   }
+  // show completed badges
+  state.planets.forEach(p => {
+    const el = document.getElementById('planet-'+p.id);
+    if(el){
+      if(p.completed) el.style.boxShadow = '0 18px 40px rgba(34,197,94,0.12)'; // green glow
+      else el.style.boxShadow = '';
+    }
+  });
 }
 
-resetBtn.addEventListener('click', resetProgress);
-
-/* ---------- UI wiring ---------- */
-startBtn.addEventListener('click', ()=> { enterMission(); });
-learnBtn.addEventListener('click', ()=> { intro.style.display='none'; mission.style.display='none'; learn.style.display='block'; });
-backFromLearn.addEventListener('click', ()=> { learn.style.display='none'; intro.style.display='block'; });
-
-/* ---------- initial render ---------- */
-function renderBadges(){
-  badgeEngine.style.opacity = state.repaired.engine ? 1 : 0.1;
-  badgeWings.style.opacity = state.repaired.wings ? 1 : 0.1;
-  badgeNav.style.opacity = state.repaired.nav ? 1 : 0.1;
-  badgeDrive.style.opacity = state.repaired.drive ? 1 : 0.1;
-}
-renderBadges();
-renderStickers();
-
-/* if mission was in progress, allow resume */
-if(state.stageIndex>0 || state.totalCorrect>0){
-  // show small resume prompt
-  setTimeout(()=> {
-    if(confirm('Resume your last mission?')) enterMission();
-  }, 500);
+function generateQuestionAndInitialize(){
+  newMissionQuestion();
+  updateMissionUI();
 }
 
-/* ---------- small helper: ensure canvas sized ---------- */
-resizeCanvas();
+/* initial setup */
+placePlanets();
+generateQuestionAndInitialize();
+renderMap();
+
+/* ---------- PACK 1 hooks for future packs ----------
+  The following global functions/places are intentionally left as integration hooks
+  for Pack 2..5 (voice, animations, minigames, ending scene, progress chart):
+
+  - window.playFizzooVoice(text)    // Pack 2 will implement speech/TTS for Fizzoo
+  - window.playCorrectAnimation()  // Pack 2 will animate ship parts on correct answer
+  - window.launchMiniGame(name, onComplete) // Pack 3 will launch mini-games
+  - window.showProgressChart()     // Pack 4 will show a progress dashboard / charts
+  - window.runMissionEnding()      // Pack 4 will implement end cinematic & final scene
+
+  These are currently no-ops in Pack 1 but will be populated later.
+--------------------------------------------------------------- */
+
+window.playFizzooVoice = function(text){
+  // placeholder: will be replaced in Pack 2
+  console.log('Fizzoo(voice) placeholder:', text);
+};
+window.playCorrectAnimation = function(){ console.log('playCorrectAnimation placeholder'); };
+window.launchMiniGame = function(name, done){ console.log('launchMiniGame placeholder:', name); if(typeof done==='function') setTimeout(done, 800); };
+window.showProgressChart = function(){ alert('Progress chart coming in Pack 4!'); };
+window.runMissionEnding = function(){ alert('Mission ending cinematic will be here in Pack 4!'); };
+
+/* ---------- helper: ensure first question exists ---------- */
+if(!currentQuestion) newMissionQuestion();
+
 </script>
 </body>
 </html>
